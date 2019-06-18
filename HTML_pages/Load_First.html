@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<title>MOL Equipment Collator</title>
+<h2>Welcome to the MOL and Dropship Equipment Information Collator</h2>
+<h3> Please Login Below using your OneLogin ID </h3>
+<script type="text/javascript">
+    function set_load_page() {
+        const Http = new XMLHttpRequest();
+        const url= document.URL + 'Login-Data';
+        Http.open("GET", url);
+        Http.send();
+
+        Http.onreadystatechange = (e) => {
+             //document.getElementById('paragraph_out').innerHTML = Http.responseText;
+        }
+    }
+    function print_cookie() {
+      document.getElementById('paragraph_out').innerHTML = document.cookie
+    }
+    function add_cookie() {
+      //document.cookie = 'username=fdjkfdglkfdgblfdg;';
+      const Http = new XMLHttpRequest();
+      const url= document.URL + 'Login-Data';
+      Http.open("POST", url);
+      var form = new FormData();
+      form.append('Username', 'Sample')
+      Http.send(form);
+    }
+</script>
+
+<input type="text" id="Username"> <br> <br>
+<input type="password" id="Password"> <br> <br>
+<button onclick='add_cookie()' type="button" name="button">Add!</button> <br> <br>
+<button onclick='print_cookie()' type="button" name="button2">Print!</button>
+
+<p id="paragraph_out"></p>
+</html>
