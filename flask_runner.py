@@ -110,11 +110,16 @@ def get_Main_page():
     #print('logged_in_cookie' in request.cookies.keys())
     if not isLoggedIn(request):
         return flask.send_from_directory(directory='HTML_pages', filename='Redirect_Home.html')
+    return flask.send_from_directory(directory='HTML_pages', filename='Main.html')
     # if 'logged_in_cookie' not in request.cookies.keys():
     #     return flask.send_from_directory(directory='HTML_pages', filename='Redirect_Home.html')
     # user_cookie = request.cookies.get('logged_in_cookie')
     # return user_cookie
 
+@app.route('/Search', methods=['POST'])
+def run_search():
+    searched_data_dict = {}
+    return ''
 
 
 @app.route('/Login-Data', methods=['POST'])
