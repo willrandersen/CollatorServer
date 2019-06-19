@@ -6,12 +6,35 @@ import flask
 import lxml.html
 from bs4 import BeautifulSoup
 import json
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_heroku import Heroku
-
+import pickle
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:Locomotives12moby!@localhost:5432/user_data'
+heroku = Heroku(app)
+db = SQLAlchemy(app)
+
+class User(db.Model):
+    __tablename__ = "user_data"
+    id = db.Column(db.Integer, primary_key=True)
+    cookie = db.Column(db.String(60), unique=True)
+    user_name = db.Column(db.String(20))
+    session = db.Column(db.Text)
+
+    def __init__(self, cookie, username, session):
+        self.cookie = cookie
+        self.user_name = username
+        self.session = pickle.dumps(session, protocol=2)
+
+    def __repr__(self):
+        return '<Cookie %r>' % self.cookie
+
+    def serialize(self):
+        return {'id' : self.id, 'name' : self.user_name, 'cookie' : self.cookie, 'session' : self.session}
+
 
 class Login_Error(Enum):
     INVALID = -1
@@ -64,41 +87,65 @@ def getRandomLetters():
         output_string +=  sample[index]
     return output_string
 
+def isLoggedIn(request):
+    if 'logged_in_cookie' not in request.cookies.keys():
+        return False
+    requested_with_cookie = request.cookies.get('logged_in_cookie')
+    cookie_in_database = db.session.query(User).filter(User.cookie == requested_with_cookie).count()
+    return cookie_in_database == 1
+
 @app.route('/')
 def get_initial_page():
+    if isLoggedIn(request):
+        return flask.send_from_directory(directory='HTML_pages', filename='Redirect_Main.html')
     return flask.send_from_directory(directory='HTML_pages', filename='Login_Main.html')
 
-
+@app.route('/check_database')
+def get_all_data():
+    all_logins = User.query.all()
+    return jsonify([e.serialize() for e in all_logins])
 
 @app.route('/Main')
 def get_Main_page():
-    return flask.send_from_directory(directory='HTML_pages', filename='Redirect_Home.html')
+    #print('logged_in_cookie' in request.cookies.keys())
+    if not isLoggedIn(request):
+        return flask.send_from_directory(directory='HTML_pages', filename='Redirect_Home.html')
+    # if 'logged_in_cookie' not in request.cookies.keys():
+    #     return flask.send_from_directory(directory='HTML_pages', filename='Redirect_Home.html')
+    # user_cookie = request.cookies.get('logged_in_cookie')
+    # return user_cookie
+
 
 
 @app.route('/Login-Data', methods=['POST'])
 def handle_login():
-    with requests.Session() as session:
-        username = request.form['Username']
-        password = request.form['Password']
+    session = requests.Session()
+    username = request.form['Username']
+    password = request.form['Password']
 
+    login_result = initiate_login(session, username, password)
+    while login_result == Login_Error.TIME_OUT:
         login_result = initiate_login(session, username, password)
-        while login_result == Login_Error.TIME_OUT:
-            login_result = initiate_login(session, username, password)
-        if login_result == Login_Error.INVALID:
-            return '{"Logged_in" : false}'
-        name = get_name_from_parser(BeautifulSoup(login_result, 'html.parser'))
-        # name = ''
-        # if username != 'FRC374':
-        #     return '{"Logged_in" : false}'
-        # name = 'William Andersen'
-        # print(name)
+    if login_result == Login_Error.INVALID:
+        return '{"Logged_in" : false}'
+    name = get_name_from_parser(BeautifulSoup(login_result, 'html.parser'))
+    # name = ''
+    # if username != 'FRC374':
+    #     return '{"Logged_in" : false}'
+    # name = 'William Andersen'
+    # print(name)
 
-        response_json = {}
-        response_json['Logged_in'] = True
-        response_json['Cookie'] = getRandomLetters()
-        response_json['Name'] = name
-        json_data = json.dumps(response_json)
-        return json_data
+    response_json = {}
+    response_json['Logged_in'] = True
+    response_json['Cookie'] = getRandomLetters()
+    response_json['Name'] = name
+
+    new_login = User(response_json['Cookie'], username, session)
+    db.session.add(new_login)
+    db.session.commit()
+
+    json_data = json.dumps(response_json)
+    return json_data
 
 if __name__ == '__main__':
     app.run(port=80, debug=True)
