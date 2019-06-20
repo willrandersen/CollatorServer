@@ -10,30 +10,36 @@ from flask import Flask, render_template, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_heroku import Heroku
 import pickle
+import datetime
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:Locomotives12moby!@localhost:5432/user_data'
 heroku = Heroku(app)
 db = SQLAlchemy(app)
 
 class User(db.Model):
-    __tablename__ = "user_data"
+    __tablename__ = "user_cookie_data"
     id = db.Column(db.Integer, primary_key=True)
     cookie = db.Column(db.String(60), unique=True)
     user_name = db.Column(db.String(20))
     session = db.Column(db.Text)
+    name = db.Column(db.String)
+    last_login = db.Column(db.DateTime)
 
-    def __init__(self, cookie, username, session):
+    def __init__(self, cookie, username, session, name, time):
         self.cookie = cookie
         self.user_name = username
         self.session = pickle.dumps(session, protocol=2)
+        self.name = name
+        self.last_login = time
 
     def __repr__(self):
-        return '<Cookie %r>' % self.cookie
+        return str({'id' : self.id, 'user_name' : self.user_name, 'cookie' : self.cookie, 'name' : self.name, 'login' : self.last_login})
 
     def serialize(self):
-        return {'id' : self.id, 'name' : self.user_name, 'cookie' : self.cookie, 'session' : self.session}
+        return {'id' : self.id, 'user_name' : self.user_name, 'cookie' : self.cookie, 'session' : self.session, 'name' : self.name, 'login' : self.last_login}
 
 
 class Login_Error(Enum):
@@ -91,14 +97,37 @@ def isLoggedIn(request):
     if 'logged_in_cookie' not in request.cookies.keys():
         return False
     requested_with_cookie = request.cookies.get('logged_in_cookie')
-    cookie_in_database = db.session.query(User).filter(User.cookie == requested_with_cookie).count()
-    return cookie_in_database == 1
+    row_with_cookie = User.query.filter_by(cookie= requested_with_cookie).first()
+    if row_with_cookie is None:
+        return False
+    duration = datetime.datetime.now() - row_with_cookie.last_login
+    duration_in_seconds = duration.total_seconds()
+    if duration_in_seconds > (15 * 60):
+        return False
+    return True
+
+def remove_outdated(username):
+    all_user_logins = User.query.filter_by(user_name= username).all()
+    for each_login in all_user_logins:
+        time_since_login = datetime.datetime.now() - each_login.last_login
+        time_since_login_seconds = time_since_login.total_seconds()
+        if time_since_login_seconds > 15 * 60:
+            User.query.filter_by(cookie=each_login.cookie).delete()
+    db.session.commit()
 
 @app.route('/')
 def get_initial_page():
     if isLoggedIn(request):
-        return flask.send_from_directory(directory='HTML_pages', filename='Redirect_Main.html')
-    return flask.send_from_directory(directory='HTML_pages', filename='Login_Main.html')
+        response_file = open('HTML_pages/Redirect_Main.html')
+        return response_file.read()
+    response_file = open('HTML_pages/Login_Main.html')
+    return response_file.read()
+
+# @app.route('/')
+# def get_initial_page():
+#     if isLoggedIn(request):
+#         return flask.send_from_directory(directory='HTML_pages', filename='Redirect_Main.html', cache_timeout=1)
+#     return flask.send_from_directory(directory='HTML_pages', filename='Login_Main.html', cache_timeout=1)
 
 @app.route('/check_database')
 def get_all_data():
@@ -109,8 +138,10 @@ def get_all_data():
 def get_Main_page():
     #print('logged_in_cookie' in request.cookies.keys())
     if not isLoggedIn(request):
-        return flask.send_from_directory(directory='HTML_pages', filename='Redirect_Home.html')
-    return flask.send_from_directory(directory='HTML_pages', filename='Main.html')
+        response_file = open('HTML_pages/Redirect_Home.html')
+        return response_file.read()
+    response_file = open('HTML_pages/Main.html')
+    return response_file.read()
     # if 'logged_in_cookie' not in request.cookies.keys():
     #     return flask.send_from_directory(directory='HTML_pages', filename='Redirect_Home.html')
     # user_cookie = request.cookies.get('logged_in_cookie')
@@ -133,6 +164,7 @@ def handle_login():
         login_result = initiate_login(session, username, password)
     if login_result == Login_Error.INVALID:
         return '{"Logged_in" : false}'
+    del password
     name = get_name_from_parser(BeautifulSoup(login_result, 'html.parser'))
     # name = ''
     # if username != 'FRC374':
@@ -145,12 +177,25 @@ def handle_login():
     response_json['Cookie'] = getRandomLetters()
     response_json['Name'] = name
 
-    new_login = User(response_json['Cookie'], username, session)
+    remove_outdated(username)
+    new_login = User(response_json['Cookie'], username, session, name, datetime.datetime.now())
     db.session.add(new_login)
     db.session.commit()
 
     json_data = json.dumps(response_json)
     return json_data
+
+# @app.after_request
+# def add_header(r):
+#     """
+#     Add headers to both force latest IE rendering engine or Chrome Frame,
+#     and also to cache the rendered page for 10 minutes.
+#     """
+#     r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+#     r.headers["Pragma"] = "no-cache"
+#     r.headers["Expires"] = "0"
+#     r.headers['Cache-Control'] = 'public, max-age=0'
+#     return r
 
 if __name__ == '__main__':
     app.run(port=80, debug=True)
