@@ -1,16 +1,14 @@
-from flask import Flask, request, Response
 from enum import Enum
 import requests
 from random import randint
-import flask
 import lxml.html
 from bs4 import BeautifulSoup
 import json
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_heroku import Heroku
-import pickle
 import datetime
+from Parsing_Task import cel, do_table_parsing
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -20,18 +18,18 @@ heroku = Heroku(app)
 db = SQLAlchemy(app)
 
 class User(db.Model):
-    __tablename__ = "user_cookie_data"
+    __tablename__ = "user_pickled_cookie_data"
     id = db.Column(db.Integer, primary_key=True)
     cookie = db.Column(db.String(60), unique=True)
     user_name = db.Column(db.String(20))
-    session = db.Column(db.Text)
+    session = db.Column(db.PickleType)
     name = db.Column(db.String)
     last_login = db.Column(db.DateTime)
 
     def __init__(self, cookie, username, session, name, time):
         self.cookie = cookie
         self.user_name = username
-        self.session = pickle.dumps(session, protocol=2)
+        self.session = session
         self.name = name
         self.last_login = time
 
@@ -85,12 +83,12 @@ def get_name_from_parser(parser):
             JSlogin_name = JSlogin_name[:JSlogin_name.index("'")]
             return JSlogin_name
 
-def getRandomLetters():
+def getRandomLetters(length=60):
     output_string = ''
     sample = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890'
-    for index in range(0, 60):
+    for index in range(0, length):
         index = randint(0, len(sample) - 1)
-        output_string +=  sample[index]
+        output_string += sample[index]
     return output_string
 
 def isLoggedIn(request):
@@ -149,9 +147,32 @@ def get_Main_page():
 
 @app.route('/Search', methods=['POST'])
 def run_search():
+    if not isLoggedIn(request):
+        return '{"Logged_in" : false}'
     searched_data_dict = {}
-    return ''
+    count = 0
+    while True:
+        if 'search_' + str(count) in request.form.keys():
+            datapoint = request.form['search_' + str(count)]
+            company_search = request.form['check_' + str(count)] in ['True', 'true']
+            searched_data_dict[datapoint] = company_search
+            count += 1
+        else:
+            break
+    requested_with_cookie = request.cookies.get('logged_in_cookie')
+    session_object = User.query.filter_by(cookie=requested_with_cookie).first().session
+    async_req = do_table_parsing.delay(searched_data_dict, session_object)
+    return async_req.id
 
+@app.route('/status_check/<task_id>')
+def check_status(task_id):
+    pass
+
+
+@app.route('/download/<request_id>')
+def send_loaded_file(request_id):
+
+    return 'Unavailable'
 
 @app.route('/Login-Data', methods=['POST'])
 def handle_login():
