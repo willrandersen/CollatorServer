@@ -40,7 +40,7 @@ class User(db.Model):
         return str({'id' : self.id, 'user_name' : self.user_name, 'cookie' : self.cookie, 'name' : self.name, 'login' : self.last_login})
 
     def serialize(self):
-        return {'id' : self.id, 'user_name' : self.user_name, 'cookie' : self.cookie, 'session' : self.session, 'name' : self.name, 'login' : self.last_login}
+        return {'id' : self.id, 'user_name' : self.user_name, 'cookie' : self.cookie, 'session' : "Session_object", 'name' : self.name, 'login' : self.last_login}
 
 
 class Login_Error(Enum):
