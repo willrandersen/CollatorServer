@@ -19,7 +19,9 @@
                 if (response.startsWith('{"Logged_in" : false}')) {
                     setTimeout(periodic_poll, 3000, task_ID);
                 } else {
-                    console.log(response)
+                    console.log(response);
+                    const table_div = document.getElementById("table_area");
+                    table_div.insertAdjacentHTML('afterbegin', response);
                 }
             }
         }
@@ -56,6 +58,8 @@
         if (running_search || added_count > 14) {
             return;
         }
+        const entry_div = document.getElementById("button_area");
+
         var text = document.createElement("input");
         var checkbox = document.createElement("input");
         var breakrow = document.createElement("BR");
@@ -69,9 +73,9 @@
         text.name = "Text_Box_" + added_count;
         text.id = "input_" + added_count;
 
-        document.body.appendChild(text);
-        document.body.appendChild(checkbox);
-        document.body.appendChild(breakrow);
+        entry_div.appendChild(text);
+        entry_div.appendChild(checkbox);
+        entry_div.appendChild(breakrow);
         added_count++;
     }
 </script>
@@ -80,6 +84,9 @@
 <br> <br>
 <button onclick='add_row()' type="button" name="button">Add Row</button>
 <br> <br>
+<div id="button_area"></div>
+
+<div id="table_area"></div>
 <script type="text/javascript">
     add_row();
 </script>
