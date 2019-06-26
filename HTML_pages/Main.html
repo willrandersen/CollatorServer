@@ -5,14 +5,33 @@
     <title>Title</title>
 </head>
 <script type="text/javascript">
-    var added_count = 0;
+    let added_count = 0;
+    let running_search = false;
+
+    function periodic_poll(task_ID) {
+        const Http = new XMLHttpRequest();
+        const url = '/status_check/' + String(task_ID);
+        Http.open("GET", url);
+        Http.send();
+        Http.onreadystatechange = function () {
+            if (Http.readyState == 4 && Http.status == 200) {
+                let response = Http.responseText;
+                if (response.startsWith('{"Logged_in" : false}')) {
+                    setTimeout(periodic_poll, 3000, task_id);
+                } else {
+                    console.log(response)
+                }
+            }
+        }
+    }
 
     function submit_search() {
+        running_search = true;
         const Http = new XMLHttpRequest();
         const url = '/Search';
         Http.open("POST", url);
-        var form = new FormData();
-        var count = 0;
+        let form = new FormData();
+        let count = 0;
         while (true) {
             if (document.getElementById("input_" + count) == null) {
                 break;
@@ -23,10 +42,18 @@
         }
 
         Http.send(form);
+        Http.onreadystatechange = function () {
+            if (Http.readyState == 4 && Http.status == 200) {
+                let task_id = Http.responseText;
+                setTimeout(periodic_poll, 3000, task_id);
+            } else if (Http.readyState == 4) {
+                running_search = false
+            }
+        }
     }
 
     function add_row() {
-        if (added_count > 14) {
+        if (running_search || added_count > 14) {
             return;
         }
         var text = document.createElement("input");

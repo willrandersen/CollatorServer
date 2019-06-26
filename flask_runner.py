@@ -9,6 +9,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_heroku import Heroku
 import datetime
 from Parsing_Task import cel, do_table_parsing
+from celery.result import AsyncResult
+
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -166,8 +168,11 @@ def run_search():
 
 @app.route('/status_check/<task_id>')
 def check_status(task_id):
-    pass
-
+    res = AsyncResult(task_id, app=cel)
+    if str(res.state) == 'SUCCESS':
+        return str(res.get())
+    else:
+        return '{"Logged_in" : false}'
 
 @app.route('/download/<request_id>')
 def send_loaded_file(request_id):
