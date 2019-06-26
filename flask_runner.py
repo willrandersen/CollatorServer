@@ -10,6 +10,7 @@ from flask_heroku import Heroku
 import datetime
 from Parsing_Task import cel, do_table_parsing
 from celery.result import AsyncResult
+import pandas as pd
 
 
 app = Flask(__name__)
@@ -170,7 +171,13 @@ def run_search():
 def check_status(task_id):
     res = AsyncResult(task_id, app=cel)
     if str(res.state) == 'SUCCESS':
-        return str(res.get())
+        pd.set_option('display.max_colwidth', -1)
+        output_table, header = res.get()
+
+        df = pd.DataFrame(output_table)
+        df.columns = header
+
+        return df.to_html(index=False)
     else:
         return '{"Logged_in" : false}'
 
