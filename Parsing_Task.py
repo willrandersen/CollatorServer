@@ -157,15 +157,15 @@ def do_table_parsing(request_dict, session):
             Confirm_Number = data_dict[each_requested_data]['Confirmation Number']
             MOL_header, MOL_table = MOL_Order_Status(session, Confirm_Number, each_requested_data)
 
-            DS_table = getDSDict(each_requested_data)
-            merge_MOL_DS(DS_table, MOL_table, MOL_header)
+            #DS_table = getDSDict(each_requested_data)
+            #merge_MOL_DS(DS_table, MOL_table, MOL_header)
 
             add_shipping_data(MOL_table, MOL_header, Confirm_Number, session)
             rows_to_print.extend(MOL_table)
         else:
             MOL_header, MOL_table = MOL_Order_Status(session, each_requested_data)
-            DS_table = getDSDict_from_SC(each_requested_data)
-            merge_MOL_DS(DS_table, MOL_table, MOL_header)
+            #DS_table = getDSDict_from_SC(each_requested_data)
+            #merge_MOL_DS(DS_table, MOL_table, MOL_header)
             add_shipping_data(MOL_table, MOL_header, each_requested_data, session)
             rows_to_print.extend(MOL_table)
 
