@@ -152,14 +152,16 @@ def do_table_parsing(request_dict, session):
 
     rows_to_print = []
     MOL_header = None
+    print('progress_1')
     for each_requested_data in data_dict.keys():
         if type(data_dict[each_requested_data]) == type({}):  # Is an FO
             Confirm_Number = data_dict[each_requested_data]['Confirmation Number']
+            print('progress_2')
             MOL_header, MOL_table = MOL_Order_Status(session, Confirm_Number, each_requested_data)
-
+            print('progress_3')
             #DS_table = getDSDict(each_requested_data)
             #merge_MOL_DS(DS_table, MOL_table, MOL_header)
-
+            print('progress_4')
             add_shipping_data(MOL_table, MOL_header, Confirm_Number, session)
             rows_to_print.extend(MOL_table)
         else:
