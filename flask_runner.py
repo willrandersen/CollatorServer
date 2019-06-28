@@ -160,6 +160,11 @@ def get_all_data():
     all_logins = User.query.all()
     return jsonify([e.serialize() for e in all_logins])
 
+@app.route('/check_searches')
+def get_all_data():
+    all_logins = Search.query.all()
+    return jsonify([e.serialize() for e in all_logins])
+
 @app.route('/Main')
 def get_Main_page():
     #print('logged_in_cookie' in request.cookies.keys())
