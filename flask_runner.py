@@ -148,7 +148,7 @@ def get_initial_page():
         return response_file.read()
     response_file = open('HTML_pages/Login_Main.html')
     return response_file.read()
-  
+
 # @app.route('/')
 # def get_initial_page():
 #     if isLoggedIn(request):
@@ -161,7 +161,7 @@ def get_all_data():
     return jsonify([e.serialize() for e in all_logins])
 
 @app.route('/check_searches')
-def get_all_data():
+def get_all_search_data():
     all_logins = Search.query.all()
     return jsonify([e.serialize() for e in all_logins])
 
