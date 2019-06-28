@@ -148,7 +148,7 @@ def get_initial_page():
         return response_file.read()
     response_file = open('HTML_pages/Login_Main.html')
     return response_file.read()
-
+  
 # @app.route('/')
 # def get_initial_page():
 #     if isLoggedIn(request):
