@@ -11,9 +11,11 @@ import datetime
 from Parsing_Task import cel, do_table_parsing
 from celery.result import AsyncResult
 import pandas as pd
+import flask_excel as excel
 
 
 app = Flask(__name__)
+excel.init_excel(app)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:Locomotives12moby!@localhost:5432/user_data'
@@ -42,6 +44,29 @@ class User(db.Model):
     def serialize(self):
         return {'id' : self.id, 'user_name' : self.user_name, 'cookie' : self.cookie, 'session' : "Session_object", 'name' : self.name, 'login' : self.last_login}
 
+class Search(db.Model):
+    __tablename__ = "recent_search_history"
+    id = db.Column(db.Integer, primary_key=True)
+    user_name = db.Column(db.String(20))
+    search_completed = db.Column(db.DateTime)
+    search_started = db.Column(db.DateTime)
+    table_data = db.Column(db.PickleType)
+    task_id = db.Column(db.String())
+    status = db.Column(db.String())
+
+    def __init__(self, user_name, task_id):
+        self.user_name = user_name
+        self.table_data = None
+        self.search_started = datetime.datetime.now()
+        self.task_id = task_id
+        self.status = 'Incomplete'
+        self.search_completed = None
+
+    def __repr__(self):
+        return str({'id' : self.id, 'user_name' : self.user_name, 'search_completed_time' : self.search_completed, 'table_data' : self.table_data, 'task_id' : self.task_id})
+
+    def serialize(self):
+        return {'id' : self.id, 'user_name' : self.user_name, 'search_completed_time' : self.search_completed, 'table_data' : self.table_data, 'task_id' : self.task_id}
 
 class Login_Error(Enum):
     INVALID = -1
@@ -157,34 +182,76 @@ def run_search():
     while True:
         if 'search_' + str(count) in request.form.keys():
             datapoint = request.form['search_' + str(count)]
+            if datapoint == '':
+                continue
             company_search = request.form['check_' + str(count)] in ['True', 'true']
             searched_data_dict[datapoint] = company_search
             count += 1
         else:
             break
     requested_with_cookie = request.cookies.get('logged_in_cookie')
-    session_object = User.query.filter_by(cookie=requested_with_cookie).first().session
-    async_req = do_table_parsing.delay(searched_data_dict, session_object)
+    user_searched = User.query.filter_by(cookie=requested_with_cookie).first()
+    async_req = do_table_parsing.delay(searched_data_dict, user_searched.session)
+
+    submitted_task = Search(user_searched.user_name, async_req.id)
+    db.session.add(submitted_task)
+    db.session.commit()
     return async_req.id
 
 @app.route('/status_check/<task_id>')
 def check_status(task_id):
+    if not isLoggedIn(request):
+        return 'Unavailable'  # change to 401
+
+    requested_with_cookie = request.cookies.get('logged_in_cookie')
+    user_object = User.query.filter_by(cookie=requested_with_cookie).first()
+
+    search_object = Search.query.filter_by(task_id=task_id).first()
+
+    if search_object is None:
+        return 'Invalid Request'
+
+    if user_object.user_name != search_object.user_name:
+        return 'Forbidden'
+
     res = AsyncResult(task_id, app=cel)
     if str(res.state) == 'SUCCESS':
-        pd.set_option('display.max_colwidth', -1)
         output_table, header = res.get()
 
+        search_object.status = str(res.state)
+        search_object.search_completed = datetime.datetime.now()
+        search_object.table_data = (output_table, header)
+        db.session.commit()
+
+        pd.set_option('display.max_colwidth', -1)
         df = pd.DataFrame(output_table)
         df.columns = header
-
         return df.to_html(index=False)
     else:
-        return '{"Logged_in" : false}'
+        return '{"status" : "' + str(res.state) + '"'
 
-@app.route('/download/<request_id>')
-def send_loaded_file(request_id):
+@app.route('/download/<task_id>')
+def send_loaded_file(task_id):
+    if not isLoggedIn(request):
+        return 'Unavailable'
 
-    return 'Unavailable'
+    requested_with_cookie = request.cookies.get('logged_in_cookie')
+    user_object = User.query.filter_by(cookie=requested_with_cookie).first()
+
+    search_object = Search.query.filter_by(task_id=task_id).first()
+
+    if search_object is None:
+        return 'Invalid Request'
+
+    if user_object.user_name != search_object.user_name:
+        return 'Forbidden'
+
+    if search_object.status != 'SUCCESS':
+        return 'File Unready'
+
+    table, header = search_object.table_data
+    table.insert(0, header)
+    return excel.make_response_from_array(table, "xlsx", file_name="Collated-Data")
 
 @app.route('/Login-Data', methods=['POST'])
 def handle_login():

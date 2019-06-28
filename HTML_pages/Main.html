@@ -16,8 +16,8 @@
         Http.onreadystatechange = function () {
             if (Http.readyState == 4 && Http.status == 200) {
                 let response = Http.responseText;
-                if (response.startsWith('{"Logged_in" : false}')) {
-                    setTimeout(periodic_poll, 3000, task_ID);
+                if (response.startsWith('{"Process_Complete" : false}')) {
+                    setTimeout(periodic_poll, 5000, task_ID);
                 } else {
                     console.log(response);
                     const table_div = document.getElementById("table_area");
