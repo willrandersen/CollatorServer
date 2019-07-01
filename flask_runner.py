@@ -108,7 +108,7 @@ def get_name_from_parser(parser):
             JSlogin_name = script.get_text().strip()
             find_string = 'var sLogonName = '
             JSlogin_name = JSlogin_name[JSlogin_name.index(find_string) + 1 + len(find_string):]
-            JSlogin_name = JSlogin_name[:JSlogin_name.index(";")]
+            JSlogin_name = JSlogin_name[:JSlogin_name.index(";") - 1]
             return JSlogin_name
 
 def getRandomLetters(length=60):
@@ -140,6 +140,21 @@ def remove_outdated(username):
         if time_since_login_seconds > 15 * 60:
             User.query.filter_by(cookie=each_login.cookie).delete()
     db.session.commit()
+
+def build_recent_table(username):
+    recent_searches = Search.query.filter_by(user_name=username).all()
+    if len(recent_searches) == 0:
+        return '<tr>No Recent Searches</tr>'
+    table_html = '<tr>'
+    for each_search in recent_searches:
+        table_html += "<td>" + each_search.search_started + "</td>"
+        table_html += "<td>" + each_search.task_id + "</td>"
+        table_html += "<td>" + each_search.status + "</td>"
+        table_html += "<td>" + "" + "</td>"
+        table_html += "<td>" + "Link" + "</td>"
+
+        table_html += "</tr>"
+    return table_html
 
 @app.route('/')
 def get_initial_page():
@@ -175,7 +190,7 @@ def get_main_page():
 
     requested_with_cookie = request.cookies.get('logged_in_cookie')
     user_searched = User.query.filter_by(cookie=requested_with_cookie).first()
-    template = template.format(user_searched.name)
+    template = template.format(user_searched.name, build_recent_table(user_searched.user_name))
     return template
 
 @app.route('/Run-Search')
