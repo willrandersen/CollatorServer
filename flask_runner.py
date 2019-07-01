@@ -154,7 +154,7 @@ def build_recent_table(username):
         table_html += "<td>" + "" + "</td>"
         #table_html += "<td>" + "Link" + "</td>"
         if str(each_search.status) == 'SUCCESS':
-            table_html += '<td> <a href="/load_search/' + each_search.task_id + '>Link</a> </td>'
+            table_html += '<td> <a href="/load_search/' + each_search.task_id + '">Link</a> </td>'
         else:
             table_html += "<td>" + "Unavailable" + "</td>"
         table_html += "</tr>"
