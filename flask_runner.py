@@ -294,6 +294,36 @@ def check_status(task_id):
     else:
         return '{"status" : "' + str(res.state) + '"'
 
+@app.route('/load_search/<task_id>')
+def show_past_search(task_id):
+    if not isLoggedIn(request):
+        return 'Unavailable'
+    requested_with_cookie = request.cookies.get('logged_in_cookie')
+    user_object = User.query.filter_by(cookie=requested_with_cookie).first()
+
+    search_object = Search.query.filter_by(task_id=task_id).first()
+
+    if search_object is None:
+        return 'Invalid Request'
+
+    if user_object.user_name != search_object.user_name:
+        return 'Forbidden'
+
+    if search_object.status != 'SUCCESS':
+        return 'File Unready'
+    table, header = search_object.table_data
+
+    response_file = open('HTML_pages/load_search_template.html')
+    template = response_file.read()
+
+    pd.set_option('display.max_colwidth', -1)
+    df = pd.DataFrame(table)
+    df.columns = header
+    table_html_string = df.to_html(index=False)
+
+    response_html = template.format(task_id, task_id, table_html_string)
+    return response_html
+
 @app.route('/download/<task_id>')
 def send_loaded_file(task_id):
     if not isLoggedIn(request):
