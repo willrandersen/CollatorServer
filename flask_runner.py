@@ -142,7 +142,7 @@ def remove_outdated(username):
     db.session.commit()
 
 def build_recent_table(username):
-    recent_searches = Search.query.filter_by(user_name=username).all()
+    recent_searches = Search.query.filter_by(user_name=username).order_by(Search.search_started).all()
     if len(recent_searches) == 0:
         return '<tr>No Recent Searches</tr>'
     table_html = '<tr>'
