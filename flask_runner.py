@@ -183,6 +183,7 @@ def run_search():
     if not isLoggedIn(request):
         return '{"Logged_in" : false}'
     searched_data_dict = {}
+    print('Search status 1')
     count = 0
     while True:
         if 'search_' + str(count) in request.form.keys():
@@ -197,6 +198,8 @@ def run_search():
     requested_with_cookie = request.cookies.get('logged_in_cookie')
     user_searched = User.query.filter_by(cookie=requested_with_cookie).first()
     async_req = do_table_parsing.delay(searched_data_dict, user_searched.session)
+
+    print('Search status 2')
 
     submitted_task = Search(user_searched.user_name, async_req.id)
     db.session.add(submitted_task)
