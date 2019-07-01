@@ -21,7 +21,9 @@
                 } else {
                     console.log(response);
                     const table_div = document.getElementById("table_area");
+                    //let download_button = document.createElement("button");
                     table_div.insertAdjacentHTML('afterbegin', response);
+                    table_div.insertAdjacentHTML('afterbegin', "<button onclick=\"window.location.href = '/download/" + task_ID + "';\">Click Here</button>");
                     running_search = false;
                 }
             }
