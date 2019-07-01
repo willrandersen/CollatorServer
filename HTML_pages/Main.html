@@ -16,7 +16,7 @@
         Http.onreadystatechange = function () {
             if (Http.readyState == 4 && Http.status == 200) {
                 let response = Http.responseText;
-                if (response.startsWith('{"Status" :')) {
+                if (response.startsWith('{"status" :')) {
                     setTimeout(periodic_poll, 5000, task_ID);
                 } else {
                     console.log(response);
