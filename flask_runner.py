@@ -157,6 +157,19 @@ def build_recent_table(username):
         table_html += "</tr>"
     return table_html
 
+def update_unresolved_searches(username):
+    recent_searches = Search.query.filter_by(user_name=username).all()
+    for each_search in recent_searches:
+        task_id = each_search.task_id
+        res = AsyncResult(task_id, app=cel)
+        each_search.status = str(res.state)
+        if str(res.state) == 'SUCCESS':
+            output_table, header = res.get()
+            each_search.search_completed = datetime.datetime.now(datetime.timezone.utc)
+            each_search.table_data = (output_table, header)
+    db.session.commit()
+
+
 @app.route('/')
 def get_initial_page():
     if isLoggedIn(request):
@@ -191,6 +204,9 @@ def get_main_page():
 
     requested_with_cookie = request.cookies.get('logged_in_cookie')
     user_searched = User.query.filter_by(cookie=requested_with_cookie).first()
+
+    update_unresolved_searches(user_searched.user_name)
+
     template = template.format(user_searched.name, build_recent_table(user_searched.user_name))
     return template
 
