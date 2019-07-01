@@ -157,10 +157,16 @@ def build_recent_table(username):
         table_html += "</tr>"
     return table_html
 
+
 def update_unresolved_searches(username):
     recent_searches = Search.query.filter_by(user_name=username).all()
     for each_search in recent_searches:
         task_id = each_search.task_id
+        time_since_search = datetime.datetime.now() - each_search.search_started
+        duration_seconds = time_since_search.total_seconds()
+        if duration_seconds > 60 * 60 * 24 * 2:
+            Search.query.filter_by(task_id=task_id).delete()
+            continue
         res = AsyncResult(task_id, app=cel)
         each_search.status = str(res.state)
         if str(res.state) == 'SUCCESS':
