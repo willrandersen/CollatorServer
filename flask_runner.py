@@ -66,7 +66,7 @@ class Search(db.Model):
         return str({'id' : self.id, 'user_name' : self.user_name, 'search_completed_time' : self.search_completed, 'table_data' : self.table_data, 'task_id' : self.task_id})
 
     def serialize(self):
-        return {'id' : self.id, 'user_name' : self.user_name, 'search_completed_time' : self.search_completed, 'table_data' : self.table_data, 'task_id' : self.task_id}
+        return {'id' : self.id, 'user_name' : self.user_name, 'search_completed_time' : self.search_completed, 'task_id' : self.task_id}
 
 class Login_Error(Enum):
     INVALID = -1
@@ -167,7 +167,7 @@ def update_unresolved_searches(username):
         task_id = each_search.task_id
         time_since_search = datetime.datetime.now() - each_search.search_started
         duration_seconds = time_since_search.total_seconds()
-        if duration_seconds > 60 * 60 * 24 * 2:
+        if duration_seconds > 60 * 60 * 24 * 7:
             Search.query.filter_by(task_id=task_id).delete()
             continue
         res = AsyncResult(task_id, app=cel)
