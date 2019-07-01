@@ -108,7 +108,7 @@ def get_name_from_parser(parser):
             JSlogin_name = script.get_text().strip()
             find_string = 'var sLogonName = '
             JSlogin_name = JSlogin_name[JSlogin_name.index(find_string) + 1 + len(find_string):]
-            JSlogin_name = JSlogin_name[:JSlogin_name.index("'")]
+            JSlogin_name = JSlogin_name[:JSlogin_name.index(";")]
             return JSlogin_name
 
 def getRandomLetters(length=60):
@@ -166,12 +166,25 @@ def get_all_search_data():
     return jsonify([e.serialize() for e in all_logins])
 
 @app.route('/Main')
-def get_Main_page():
+def get_main_page():
+    if not isLoggedIn(request):
+        response_file = open('HTML_pages/Redirect_Home.html')
+        return response_file.read()
+    response_file = open('HTML_pages/Main_Page.html')
+    template = response_file.read()
+
+    requested_with_cookie = request.cookies.get('logged_in_cookie')
+    user_searched = User.query.filter_by(cookie=requested_with_cookie).first()
+    template = template.format(user_searched.name)
+    return template
+
+@app.route('/Run-Search')
+def get_search_page():
     #print('logged_in_cookie' in request.cookies.keys())
     if not isLoggedIn(request):
         response_file = open('HTML_pages/Redirect_Home.html')
         return response_file.read()
-    response_file = open('HTML_pages/Main.html')
+    response_file = open('HTML_pages/Run_Search.html')
     return response_file.read()
     # if 'logged_in_cookie' not in request.cookies.keys():
     #     return flask.send_from_directory(directory='HTML_pages', filename='Redirect_Home.html')
