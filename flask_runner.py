@@ -57,7 +57,7 @@ class Search(db.Model):
     def __init__(self, user_name, task_id):
         self.user_name = user_name
         self.table_data = None
-        self.search_started = datetime.datetime.now()
+        self.search_started = datetime.datetime.now(datetime.timezone.utc)
         self.task_id = task_id
         self.status = 'Incomplete'
         self.search_completed = None
@@ -146,8 +146,9 @@ def build_recent_table(username):
     if len(recent_searches) == 0:
         return '<tr>No Recent Searches</tr>'
     table_html = '<tr>'
+    time_delt = datetime.timedelta(hours=5)
     for each_search in recent_searches:
-        table_html += "<td>" + str(each_search.search_started) + "</td>"
+        table_html += "<td>" + (each_search.search_started - time_delt).strftime("%b %d %Y %H:%M:%S") + "</td>"
         table_html += "<td>" + each_search.task_id + "</td>"
         table_html += "<td>" + each_search.status + "</td>"
         table_html += "<td>" + "" + "</td>"
@@ -256,7 +257,7 @@ def check_status(task_id):
         output_table, header = res.get()
 
         search_object.status = str(res.state)
-        search_object.search_completed = datetime.datetime.now()
+        search_object.search_completed = datetime.datetime.now(datetime.timezone.utc)
         search_object.table_data = (output_table, header)
         db.session.commit()
 
