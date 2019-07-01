@@ -149,6 +149,7 @@ def build_recent_table(username):
     table_html = '<tr>'
     time_delt = datetime.timedelta(hours=5)
     for each_search in recent_searches:
+        table_html += "\n"
         table_html += "<td>" + (each_search.search_started - time_delt).strftime("%b %d %Y %H:%M:%S") + " CDT </td>"
         table_html += "<td>" + each_search.task_id + "</td>"
         table_html += "<td>" + each_search.status + "</td>"
@@ -159,7 +160,7 @@ def build_recent_table(username):
         else:
             table_html += "<td>" + "Unavailable" + "</td>"
         table_html += "</tr>"
-    return table_html
+    return table_html + "\n"
 
 
 def update_unresolved_searches(username):
