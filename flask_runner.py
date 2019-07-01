@@ -13,6 +13,7 @@ from celery.result import AsyncResult
 import pandas as pd
 import flask_excel as excel
 
+MAX_TABLE_SIZE = 15
 
 app = Flask(__name__)
 excel.init_excel(app)
@@ -148,7 +149,7 @@ def build_recent_table(username):
     table_html = '<tr>'
     time_delt = datetime.timedelta(hours=5)
     for each_search in recent_searches:
-        table_html += "<td>" + (each_search.search_started - time_delt).strftime("%b %d %Y %H:%M:%S") + "</td>"
+        table_html += "<td>" + (each_search.search_started - time_delt).strftime("%b %d %Y %H:%M:%S") + " CDT </td>"
         table_html += "<td>" + each_search.task_id + "</td>"
         table_html += "<td>" + each_search.status + "</td>"
         table_html += "<td>" + "" + "</td>"
@@ -259,6 +260,10 @@ def run_search():
 
     submitted_task = Search(user_searched.user_name, async_req.id)
     db.session.add(submitted_task)
+
+    recent_searches = Search.query.filter_by(user_name=user_searched.user_name).order_by(Search.search_started).all()
+    if len(recent_searches) > MAX_TABLE_SIZE:
+        Search.query.filter_by(task_id=recent_searches[0].task_id).delete()
     db.session.commit()
     return async_req.id
 
