@@ -189,6 +189,7 @@ def run_search():
         if 'search_' + str(count) in request.form.keys():
             datapoint = request.form['search_' + str(count)]
             if datapoint == '':
+                count += 1
                 continue
             company_search = request.form['check_' + str(count)] in ['True', 'true']
             searched_data_dict[datapoint] = company_search
