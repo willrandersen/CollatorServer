@@ -147,7 +147,7 @@ def build_recent_table(username):
         return '<tr>No Recent Searches</tr>'
     table_html = '<tr>'
     for each_search in recent_searches:
-        table_html += "<td>" + each_search.search_started + "</td>"
+        table_html += "<td>" + str(each_search.search_started) + "</td>"
         table_html += "<td>" + each_search.task_id + "</td>"
         table_html += "<td>" + each_search.status + "</td>"
         table_html += "<td>" + "" + "</td>"
