@@ -170,12 +170,13 @@ def update_unresolved_searches(username):
         if duration_seconds > 60 * 60 * 24 * 7:
             Search.query.filter_by(task_id=task_id).delete()
             continue
-        res = AsyncResult(task_id, app=cel)
-        each_search.status = str(res.state)
-        if str(res.state) == 'SUCCESS':
-            output_table, header = res.get()
-            each_search.search_completed = datetime.datetime.now(datetime.timezone.utc)
-            each_search.table_data = (output_table, header)
+        if each_search.status != 'SUCCESS':
+            res = AsyncResult(task_id, app=cel)
+            each_search.status = str(res.state)
+            if str(res.state) == 'SUCCESS':
+                output_table, header = res.get()
+                each_search.search_completed = datetime.datetime.now(datetime.timezone.utc)
+                each_search.table_data = (output_table, header)
     db.session.commit()
 
 
