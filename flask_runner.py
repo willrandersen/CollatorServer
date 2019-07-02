@@ -379,10 +379,12 @@ def handle_login():
     login_result = initiate_login(session, username, password)
     while login_result == Login_Error.TIME_OUT:
         login_result = initiate_login(session, username, password)
+    name = get_name_from_parser(BeautifulSoup(login_result, 'html.parser'))
+    if name is None:
+        return '{"Logged_in" : false}', 401
     if login_result == Login_Error.INVALID:
         return '{"Logged_in" : false}', 401
     del password
-    name = get_name_from_parser(BeautifulSoup(login_result, 'html.parser'))
     # name = ''
     # if username != 'FRC374':
     #     return '{"Logged_in" : false}'
