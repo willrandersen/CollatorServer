@@ -320,7 +320,8 @@ def check_status(task_id):
 @app.route('/load_search/<task_id>')
 def show_past_search(task_id):
     if not isLoggedIn(request):
-        return 'Unavailable', 401
+        response_file = open('HTML_pages/Redirect_Home.html')
+        return response_file.read(), 401
     requested_with_cookie = request.cookies.get('logged_in_cookie')
     user_object = User.query.filter_by(cookie=requested_with_cookie).first()
 
@@ -350,7 +351,8 @@ def show_past_search(task_id):
 @app.route('/download/<task_id>')
 def send_loaded_file(task_id):
     if not isLoggedIn(request):
-        return 'Unavailable'
+        response_file = open('HTML_pages/Redirect_Home.html')
+        return response_file.read(), 401
 
     requested_with_cookie = request.cookies.get('logged_in_cookie')
     user_object = User.query.filter_by(cookie=requested_with_cookie).first()
