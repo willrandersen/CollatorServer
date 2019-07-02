@@ -144,6 +144,18 @@ def remove_outdated(username):
             User.query.filter_by(cookie=each_login.cookie).delete()
     db.session.commit()
 
+
+def get_bolded_dict_string(dict):
+    string_builder = ''
+    for each_entry in dict.keys():
+        if dict[each_entry]:
+            string_builder += "<b>" + each_entry + "</b>"
+        else:
+            string_builder += each_entry
+        string_builder += ', '
+    return string_builder[:-2]
+
+
 def build_recent_table(username):
     recent_searches = Search.query.filter_by(user_name=username).order_by(Search.search_started).all()
     if len(recent_searches) == 0:
@@ -155,8 +167,8 @@ def build_recent_table(username):
         table_html += "<td>" + (each_search.search_started - time_delt).strftime("%b %d %Y %H:%M:%S") + " CDT </td>"
         table_html += "<td>" + each_search.task_id + "</td>"
         table_html += "<td>" + each_search.status + "</td>"
-        table_html += "<td>" + str(each_search.items_searched) + "</td>"
-        table_html += "<td>" + "" + "</td>"
+        table_html += "<td>" + get_bolded_dict_string(each_search.items_searched) + "</td>"
+        #table_html += "<td>" + "" + "</td>"
         #table_html += "<td>" + "Link" + "</td>"
         if str(each_search.status) == 'SUCCESS':
             table_html += '<td> <a href="/load_search/' + each_search.task_id + '">Link</a> </td>'
