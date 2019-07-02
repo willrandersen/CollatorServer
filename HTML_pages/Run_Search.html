@@ -31,6 +31,9 @@
     }
 
     function submit_search() {
+        if (running_search) {
+            return;
+        }
         running_search = true;
         const Http = new XMLHttpRequest();
         const url = '/Search';

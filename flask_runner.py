@@ -269,7 +269,7 @@ def run_search():
         else:
             break
     if len(searched_data_dict) == 0:
-        return 'Invalid Search'
+        return 'Invalid Response', 429
     requested_with_cookie = request.cookies.get('logged_in_cookie')
     user_searched = User.query.filter_by(cookie=requested_with_cookie).first()
     async_req = do_table_parsing.delay(searched_data_dict, user_searched.session)
