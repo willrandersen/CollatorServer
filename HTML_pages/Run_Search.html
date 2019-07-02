@@ -14,7 +14,7 @@
         Http.open("GET", url);
         Http.send();
         Http.onreadystatechange = function () {
-            if (Http.readyState == 4 && Http.status == 200) {
+            if (Http.readyState == 4) {
                 let response = Http.responseText;
                 if (response.startsWith('{"status" :')) {
                     setTimeout(periodic_poll, 5000, task_ID);
@@ -51,7 +51,7 @@
 
         Http.send(form);
         Http.onreadystatechange = function () {
-            if (Http.readyState == 4 && Http.status == 200) {
+            if (Http.readyState == 4 && Http.status == 202) {
                 let task_id = Http.responseText;
                 setTimeout(periodic_poll, 3000, task_id);
             } else if (Http.readyState == 4) {

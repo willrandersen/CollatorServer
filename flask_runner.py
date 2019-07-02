@@ -253,7 +253,7 @@ def get_search_page():
 @app.route('/Search', methods=['POST'])
 def run_search():
     if not isLoggedIn(request):
-        return '{"Logged_in" : false}'
+        return '{"Logged_in" : false}', 401
     searched_data_dict = {}
     print('Search status 1')
     count = 0
@@ -269,7 +269,7 @@ def run_search():
         else:
             break
     if len(searched_data_dict) == 0:
-        return 'Invalid Response', 429
+        return 'Invalid Response', 400
     requested_with_cookie = request.cookies.get('logged_in_cookie')
     user_searched = User.query.filter_by(cookie=requested_with_cookie).first()
     async_req = do_table_parsing.delay(searched_data_dict, user_searched.session)
@@ -283,12 +283,12 @@ def run_search():
     if len(recent_searches) > MAX_TABLE_SIZE:
         Search.query.filter_by(task_id=recent_searches[0].task_id).delete()
     db.session.commit()
-    return async_req.id
+    return async_req.id, 202
 
 @app.route('/status_check/<task_id>')
 def check_status(task_id):
     if not isLoggedIn(request):
-        return 'Unavailable'  # change to 401
+        return 'Unavailable', 401  # change to 401
 
     requested_with_cookie = request.cookies.get('logged_in_cookie')
     user_object = User.query.filter_by(cookie=requested_with_cookie).first()
@@ -299,7 +299,7 @@ def check_status(task_id):
         return 'Invalid Request'
 
     if user_object.user_name != search_object.user_name:
-        return 'Forbidden'
+        return 'Forbidden', 403
 
     res = AsyncResult(task_id, app=cel)
     if str(res.state) == 'SUCCESS':
@@ -320,7 +320,7 @@ def check_status(task_id):
 @app.route('/load_search/<task_id>')
 def show_past_search(task_id):
     if not isLoggedIn(request):
-        return 'Unavailable'
+        return 'Unavailable', 401
     requested_with_cookie = request.cookies.get('logged_in_cookie')
     user_object = User.query.filter_by(cookie=requested_with_cookie).first()
 
@@ -361,7 +361,7 @@ def send_loaded_file(task_id):
         return 'Invalid Request'
 
     if user_object.user_name != search_object.user_name:
-        return 'Forbidden'
+        return 'Forbidden', 403
 
     if search_object.status != 'SUCCESS':
         return 'File Unready'
@@ -380,7 +380,7 @@ def handle_login():
     while login_result == Login_Error.TIME_OUT:
         login_result = initiate_login(session, username, password)
     if login_result == Login_Error.INVALID:
-        return '{"Logged_in" : false}'
+        return '{"Logged_in" : false}', 401
     del password
     name = get_name_from_parser(BeautifulSoup(login_result, 'html.parser'))
     # name = ''
