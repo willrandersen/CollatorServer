@@ -46,7 +46,7 @@ class User(db.Model):
         return {'id' : self.id, 'user_name' : self.user_name, 'cookie' : self.cookie, 'session' : "Session_object", 'name' : self.name, 'login' : self.last_login}
 
 class Search(db.Model):
-    __tablename__ = "recent_search_history"
+    __tablename__ = "recent_searches"
     id = db.Column(db.Integer, primary_key=True)
     user_name = db.Column(db.String(20))
     search_completed = db.Column(db.DateTime)
@@ -54,8 +54,10 @@ class Search(db.Model):
     table_data = db.Column(db.PickleType)
     task_id = db.Column(db.String())
     status = db.Column(db.String())
+    items_searched = db.Column(db.PickleType)
 
-    def __init__(self, user_name, task_id):
+    def __init__(self, user_name, task_id, search_dict):
+        self.items_searched = search_dict
         self.user_name = user_name
         self.table_data = None
         self.search_started = datetime.datetime.now(datetime.timezone.utc)
@@ -153,6 +155,7 @@ def build_recent_table(username):
         table_html += "<td>" + (each_search.search_started - time_delt).strftime("%b %d %Y %H:%M:%S") + " CDT </td>"
         table_html += "<td>" + each_search.task_id + "</td>"
         table_html += "<td>" + each_search.status + "</td>"
+        table_html += "<td>" + str(each_search.items_searched) + "</td>"
         table_html += "<td>" + "" + "</td>"
         #table_html += "<td>" + "Link" + "</td>"
         if str(each_search.status) == 'SUCCESS':
@@ -259,7 +262,7 @@ def run_search():
 
     print('Search status 2')
 
-    submitted_task = Search(user_searched.user_name, async_req.id)
+    submitted_task = Search(user_searched.user_name, async_req.id, searched_data_dict)
     db.session.add(submitted_task)
 
     recent_searches = Search.query.filter_by(user_name=user_searched.user_name).order_by(Search.search_started).all()
