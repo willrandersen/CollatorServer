@@ -25,6 +25,8 @@
                     table_div.insertAdjacentHTML('afterbegin', response);
                     table_div.insertAdjacentHTML('afterbegin', "<button onclick=\"window.location.href = '/download/" + task_ID + "';\">Download</button> <br><br>");
                     running_search = false;
+                    let add_row_button = document.getElementById("add_point_button");
+                    add_row_button.disabled = false;
                 }
             }
         }
@@ -34,6 +36,8 @@
         if (running_search) {
             return;
         }
+        let add_row_button = document.getElementById("add_point_button");
+            add_row_button.disabled = false;
         running_search = true;
         const Http = new XMLHttpRequest();
         const url = '/Search';
@@ -55,6 +59,8 @@
                 let task_id = Http.responseText;
                 setTimeout(periodic_poll, 3000, task_id);
             } else if (Http.readyState == 4) {
+                let add_row_button = document.getElementById("add_point_button");
+            add_row_button.disabled = false;
                 running_search = false
             }
         }
@@ -65,9 +71,6 @@
             let add_row_button = document.getElementById("add_point_button");
             add_row_button.disabled = true;
             return;
-        } else {
-            let add_row_button = document.getElementById("add_point_button");
-            add_row_button.disabled = false;
         }
         const entry_div = document.getElementById("button_area");
 
