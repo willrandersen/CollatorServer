@@ -346,7 +346,9 @@ def show_past_search(task_id):
     df.columns = header
     table_html_string = df.to_html(index=False)
 
-    response_html = template.format(task_id, task_id, table_html_string)
+    time_delt = datetime.timedelta(hours=5)
+
+    response_html = template.format(task_id, task_id, search_object.user_name, (search_object.search_started - time_delt).strftime("%b %d %Y %H:%M:%S") + " CDT </td>", get_bolded_dict_string(search_object.items_searched) ,table_html_string)
     return response_html
 
 @app.route('/download/<task_id>')
