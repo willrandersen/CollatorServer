@@ -63,7 +63,7 @@
     function add_row() {
         if (running_search || added_count > 14) {
             let add_row_button = document.getElementById("add_point_button");
-            add_row_button.disabled = false;
+            add_row_button.disabled = true;
             return;
         } else {
             let add_row_button = document.getElementById("add_point_button");
@@ -96,6 +96,7 @@
 <br> <button onclick='add_row()' type="button" id="add_point_button" name="button">Add Additional Data Point</button>
 <br> <br>
 <button onclick='submit_search()' type="button" name="submit">Start Collator</button> <br>
+<br>
 <div id="table_area"></div>
 <script type="text/javascript">
     add_row();

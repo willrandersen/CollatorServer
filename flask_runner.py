@@ -297,7 +297,7 @@ def check_status(task_id):
     search_object = Search.query.filter_by(task_id=task_id).first()
 
     if search_object is None:
-        return 'Invalid Request'
+        return 'Invalid Request', 404
 
     if user_object.user_name != search_object.user_name:
         return 'Forbidden', 403
@@ -329,7 +329,7 @@ def show_past_search(task_id):
     search_object = Search.query.filter_by(task_id=task_id).first()
 
     if search_object is None:
-        return 'Invalid Request'
+        return 'Invalid Request', 404
 
     if user_object.user_name != search_object.user_name:
         return 'Forbidden'
