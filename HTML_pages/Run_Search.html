@@ -62,7 +62,12 @@
 
     function add_row() {
         if (running_search || added_count > 14) {
+            let add_row_button = document.getElementById("add_point_button");
+            add_row_button.disabled = false;
             return;
+        } else {
+            let add_row_button = document.getElementById("add_point_button");
+            add_row_button.disabled = false;
         }
         const entry_div = document.getElementById("button_area");
 
@@ -88,9 +93,9 @@
 <h2>Enter an FO/SC/Project</h2> <br>
 <p>Instructions: Each box takes an FO or an List ID. <br> If you would like to also load all other data on a project, mark the check beside the data point. <br> When completed results will be displayed below. They'll also be available on the home screen.</p><br>
 <div id="button_area"></div>
-<br> <button onclick='submit_search()' type="button" name="submit">Start Collator</button>
+<br> <button onclick='add_row()' type="button" id="add_point_button" name="button">Add Additional Data Point</button>
 <br> <br>
-<button onclick='add_row()' type="button" name="button">Add Additional Data Point</button> <br>
+<button onclick='submit_search()' type="button" name="submit">Start Collator</button> <br>
 <div id="table_area"></div>
 <script type="text/javascript">
     add_row();
