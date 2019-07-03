@@ -163,7 +163,7 @@ def build_recent_table(username):
         return '<tr>No Recent Searches</tr>'
     table_html = '<tr>'
     time_delt = datetime.timedelta(hours=5)
-    for each_search in recent_searches:
+    for each_search in recent_searches[::-1]:
         table_html += "\n<tr>"
         table_html += "<td>" + (each_search.search_started - time_delt).strftime("%b %d %Y %H:%M:%S") + " CDT </td>"
         table_html += "<td>" + each_search.task_id + "</td>"
