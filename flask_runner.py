@@ -56,6 +56,7 @@ class Search(db.Model):
     status = db.Column(db.String())
     items_searched = db.Column(db.PickleType)
 
+
     def __init__(self, user_name, task_id, search_dict):
         self.items_searched = search_dict
         self.user_name = user_name
@@ -372,6 +373,7 @@ def send_loaded_file(task_id):
     table.insert(0, header)
     return excel.make_response_from_array(table, "xlsx", file_name="Collated-Data")
 
+
 @app.route('/Login-Data', methods=['POST'])
 def handle_login():
     session = requests.Session()
@@ -381,10 +383,10 @@ def handle_login():
     login_result = initiate_login(session, username, password)
     while login_result == Login_Error.TIME_OUT:
         login_result = initiate_login(session, username, password)
+    if login_result == Login_Error.INVALID:
+        return '{"Logged_in" : false}', 401
     name = get_name_from_parser(BeautifulSoup(login_result, 'html.parser'))
     if name is None:
-        return '{"Logged_in" : false}', 401
-    if login_result == Login_Error.INVALID:
         return '{"Logged_in" : false}', 401
     del password
     # name = ''
