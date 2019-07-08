@@ -123,6 +123,21 @@
         added_count++;
     }
 </script>
+
+<script type="text/javascript">
+    function send_logout() {
+        const Http = new XMLHttpRequest();
+        let url = "/logout";
+        Http.open("DELETE", url);
+        Http.send();
+        Http.onreadystatechange = function () {
+            if (Http.readyState == 4) {
+                window.location = '/'
+            }
+        }
+    }
+</script>
+
 <h2>Enter an FO/SC/Project</h2> <br>
 <p>Instructions: Each box takes an FO or a List ID. <br> If you would like to also load all other data on a project, mark the check beside the data point (This can take a few minutes).<br> When completed results will be displayed below. They'll also be available on the home screen.</p><br>
 <div id="button_area"></div>
@@ -131,6 +146,7 @@
 <button onclick='submit_search()' type="button" name="submit">Start Collator</button> <br>
 <p id="paragraph_out"></p>
 <div id="table_area"></div>
+<button onclick="send_logout()">Log Out</button>
 <script type="text/javascript">
     add_row();
 </script>
