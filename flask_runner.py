@@ -197,6 +197,13 @@ def update_unresolved_searches(username):
                 each_search.table_data = (output_table, header)
     db.session.commit()
 
+@app.route('/logout')
+def logout_data():
+    if not isLoggedIn(request):
+        return 'Not Logged In', 203
+    requested_with_cookie = request.cookies.get('logged_in_cookie')
+    user_searched = User.query.filter_by(cookie=requested_with_cookie).delete()
+    db.session.commit()
 
 @app.route('/')
 def get_initial_page():
@@ -332,8 +339,8 @@ def show_past_search(task_id):
     if search_object is None:
         return 'Invalid Request', 404
 
-    if user_object.user_name != search_object.user_name:
-        return 'Forbidden'
+    #if user_object.user_name != search_object.user_name:
+    #    return 'Forbidden'
 
     if search_object.status != 'SUCCESS':
         return 'File Unready'
