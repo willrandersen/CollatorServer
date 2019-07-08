@@ -8,6 +8,32 @@
     let added_count = 0;
     let running_search = false;
 
+    let dot_count = 1;
+    function change_dots() {
+        if (running_search) {
+            setTimeout(change_dots, 500);
+            if (dot_count == 0) {
+                document.getElementById('paragraph_out').innerHTML = 'Running Search .';
+                dot_count++;
+            } else if (dot_count == 1) {
+                document.getElementById('paragraph_out').innerHTML = 'Running Search ..';
+                dot_count++;
+            } else if (dot_count == 2) {
+                document.getElementById('paragraph_out').innerHTML = 'Running Search ...';
+                dot_count++;
+            } else if (dot_count == 3) {
+                document.getElementById('paragraph_out').innerHTML = 'Running Search ....';
+                dot_count++;
+            } else if (dot_count == 4) {
+                document.getElementById('paragraph_out').innerHTML = 'Running Search ';
+                dot_count = 0;
+            }
+        } else {
+            document.getElementById('paragraph_out').innerHTML = '';
+        }
+    }
+
+
     function periodic_poll(task_ID) {
         const Http = new XMLHttpRequest();
         const url = '/status_check/' + String(task_ID);
@@ -19,6 +45,7 @@
                 if (response.startsWith('{"status" :')) {
                     setTimeout(periodic_poll, 5000, task_ID);
                 } else {
+                    document.getElementById('paragraph_out').innerHTML = '';
                     console.log(response);
                     const table_div = document.getElementById("table_area");
                     //let download_button = document.createElement("button");
@@ -58,6 +85,8 @@
             if (Http.readyState == 4 && Http.status == 202) {
                 let task_id = Http.responseText;
                 setTimeout(periodic_poll, 3000, task_id);
+                document.getElementById('paragraph_out').innerHTML = 'Running Search .';
+                setTimeout(change_dots, 500);
             } else if (Http.readyState == 4) {
                 let add_row_button = document.getElementById("add_point_button");
             add_row_button.disabled = false;
@@ -99,7 +128,7 @@
 <br> <button onclick='add_row()' type="button" id="add_point_button" name="button">Add Additional Data Point</button>
 <br> <br>
 <button onclick='submit_search()' type="button" name="submit">Start Collator</button> <br>
-<br>
+<p id="paragraph_out"></p>
 <div id="table_area"></div>
 <script type="text/javascript">
     add_row();
