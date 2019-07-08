@@ -269,7 +269,7 @@ def run_search():
     count = 0
     while True:
         if 'search_' + str(count) in request.form.keys():
-            datapoint = request.form['search_' + str(count)]
+            datapoint = request.form['search_' + str(count)].strip()
             if datapoint == '':
                 count += 1
                 continue
