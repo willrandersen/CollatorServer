@@ -6,22 +6,38 @@
     <meta name="format-detection" content="telephone=no">
 </head>
 <body>
+<script type="text/javascript">
+    function send_logout() {
+        const Http = new XMLHttpRequest();
+        let url = "/logout";
+        Http.open("DELETE", url);
+        Http.send();
+        Http.onreadystatechange = function () {
+            if (Http.readyState == 4) {
+                window.location = '/'
+            }
+        }
+    }
+</script>
 <h2>Welcome {}</h2>
 <p>Click below to create a search!</p>
-<button onclick="window.location.href = '/Run-Search';">Search Page</button> <br>
+<button onclick="window.location.href = '/Run-Search';">Search Page</button>
+<br>
 <p>Recent Searches:</p>
-<table  border="1">
-  <tr>
-    <th>Search Date</th>
-    <th>ID</th>
-    <th>Status</th>
-    <th>Searched items*</th>
-    <th>Output</th>
-  </tr>
+<table border="1">
+    <tr>
+        <th>Search Date</th>
+        <th>ID</th>
+        <th>Status</th>
+        <th>Searched items*</th>
+        <th>Output</th>
+    </tr>
     {}
 </table>
-<p>* Note: A bolded element means a project search was ran on it. This means that all other FOs/SCs in the project were included.</p>
+<p>* Note: A bolded element means a project search was ran on it. This means that all other FOs/SCs in the project were
+    included.</p>
 <br>
 <p>Searches are deleted after 1 week!</p>
+<button onclick="send_logout()">Log Out</button>
 </body>
 </html>

@@ -197,13 +197,15 @@ def update_unresolved_searches(username):
                 each_search.table_data = (output_table, header)
     db.session.commit()
 
-@app.route('/logout')
+
+@app.route('/logout', methods=['DELETE'])
 def logout_data():
     if not isLoggedIn(request):
         return 'Not Logged In', 203
     requested_with_cookie = request.cookies.get('logged_in_cookie')
     user_searched = User.query.filter_by(cookie=requested_with_cookie).delete()
     db.session.commit()
+    return 'Logged Out', 200
 
 @app.route('/')
 def get_initial_page():
