@@ -8,27 +8,23 @@
     let dot_count = 1;
     function change_dots() {
         if (loading) {
+            setTimeout(change_dots, 500);
             if (dot_count == 0) {
                 document.getElementById('paragraph_out').innerHTML = 'Logging In .';
                 dot_count++;
-            }
-            if (dot_count == 1) {
+            } else if (dot_count == 1) {
                 document.getElementById('paragraph_out').innerHTML = 'Logging In ..';
                 dot_count++;
-            }
-            if (dot_count == 2) {
+            } else if (dot_count == 2) {
                 document.getElementById('paragraph_out').innerHTML = 'Logging In ...';
                 dot_count++;
-            }
-            if (dot_count == 3) {
+            } else if (dot_count == 3) {
                 document.getElementById('paragraph_out').innerHTML = 'Logging In ....';
                 dot_count++;
-            }
-            if (dot_count == 4) {
+            } else if (dot_count == 4) {
                 document.getElementById('paragraph_out').innerHTML = 'Logging In ';
                 dot_count = 0;
             }
-            setTimeout(change_dots, 1000);
         }
     }
 
@@ -42,7 +38,7 @@
         Http.send(form);
         document.getElementById('paragraph_out').innerHTML = 'Logging In .';
         loading = true;
-        setTimeout(change_dots, 1000);
+        setTimeout(change_dots, 500);
         Http.onreadystatechange = function () {
             if (Http.readyState == 4) {
                 loading = false;
