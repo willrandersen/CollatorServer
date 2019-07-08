@@ -47,7 +47,7 @@
                     let json_response = JSON.parse(Http.responseText);
                     if (json_response.Logged_in) {
                         document.getElementById('paragraph_out').innerHTML = 'Welcome ' + json_response.Name;
-                        document.cookie = 'logged_in_cookie=' + json_response.Cookie + '; max-age=1200; path=/;"';
+                        document.cookie = 'logged_in_cookie=' + json_response.Cookie + '; max-age=1; path=/;"';
                         window.location = '/Main';
                     } else {
                         document.getElementById('paragraph_out').innerHTML = 'Login Failed!';
