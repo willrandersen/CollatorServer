@@ -412,8 +412,8 @@ def handle_login():
     response_json['Cookie'] = getRandomLetters()
     response_json['Name'] = name
 
-    remove_outdated(username)
-    new_login = User(response_json['Cookie'], username, session, name, datetime.datetime.now())
+    remove_outdated(username.upper())
+    new_login = User(response_json['Cookie'], username.upper(), session, name, datetime.datetime.now())
     db.session.add(new_login)
     db.session.commit()
 
