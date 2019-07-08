@@ -4,25 +4,63 @@
 <h2>Welcome to the MOL and Dropship Equipment Information Collator</h2>
 <h3> Please Login Below using your OneLogin ID </h3>
 <script type="text/javascript">
+    let loading = false;
+    let dot_count = 1;
+    function change_dots() {
+        if (loading) {
+            if (dot_count == 0) {
+                document.getElementById('paragraph_out').innerHTML = 'Logging In .';
+                dot_count++;
+            }
+            if (dot_count == 1) {
+                document.getElementById('paragraph_out').innerHTML = 'Logging In ..';
+                dot_count++;
+            }
+            if (dot_count == 2) {
+                document.getElementById('paragraph_out').innerHTML = 'Logging In ...';
+                dot_count++;
+            }
+            if (dot_count == 3) {
+                document.getElementById('paragraph_out').innerHTML = 'Logging In ....';
+                dot_count++;
+            }
+            if (dot_count == 4) {
+                document.getElementById('paragraph_out').innerHTML = 'Logging In ';
+                dot_count = 0;
+            }
+            setTimeout(change_dots, 1000);
+        }
+    }
+
     function login_request() {
         const Http = new XMLHttpRequest();
-        const url= '/Login-Data';
+        const url = '/Login-Data';
         Http.open("POST", url);
         var form = new FormData();
         form.append('Username', document.getElementById('Username').value);
         form.append('Password', document.getElementById('Password').value);
         Http.send(form);
-        document.getElementById('paragraph_out').innerHTML = 'Logging In';
-        Http.onreadystatechange = function() {
+        document.getElementById('paragraph_out').innerHTML = 'Logging In .';
+        loading = true;
+        setTimeout(change_dots, 1000);
+        Http.onreadystatechange = function () {
             if (Http.readyState == 4) {
-                var json_response = JSON.parse(Http.responseText);
-                if (json_response.Logged_in) {
-                    document.getElementById('paragraph_out').innerHTML = 'Welcome ' + json_response.Name;
-                    document.cookie = 'logged_in_cookie=' + json_response.Cookie + '; max-age=1200; path=/;"';
-                    window.location = '/Main';
-                }
-                else {
-                    document.getElementById('paragraph_out').innerHTML = 'Invalid Credentials!'
+                loading = false;
+                if (Http.status == 200) {
+
+                    let json_response = JSON.parse(Http.responseText);
+                    if (json_response.Logged_in) {
+                        document.getElementById('paragraph_out').innerHTML = 'Welcome ' + json_response.Name;
+                        document.cookie = 'logged_in_cookie=' + json_response.Cookie + '; max-age=1200; path=/;"';
+                        window.location = '/Main';
+                    } else {
+                        document.getElementById('paragraph_out').innerHTML = 'Login Failed!';
+                    }
+
+                } else if (Http.status == 401) {
+                    document.getElementById('paragraph_out').innerHTML = 'Invalid Credentials!';
+                } else {
+                    document.getElementById('paragraph_out').innerHTML = 'Login Failed!';
                 }
             }
         }
@@ -31,7 +69,8 @@
 
 <input type="text" id="Username" placeholder="Username"> <br> <br>
 <input type="password" id="Password" placeholder="Password"> <br> <br>
-<button onclick='login_request()' type="button" name="button">Login!</button> <br> <br>
+<button onclick='login_request()' type="button" name="button">Login!</button>
+<br> <br>
 
 <p id="paragraph_out"></p>
 </html>
