@@ -318,6 +318,7 @@ def check_status(task_id):
     else:
         return '{"status" : "' + str(res.state) + '"'
 
+
 @app.route('/load_search/<task_id>')
 def show_past_search(task_id):
     if not isLoggedIn(request):

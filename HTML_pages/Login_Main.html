@@ -12,6 +12,7 @@
         form.append('Username', document.getElementById('Username').value);
         form.append('Password', document.getElementById('Password').value);
         Http.send(form);
+        document.getElementById('paragraph_out').innerHTML = 'Logging In';
         Http.onreadystatechange = function() {
             if (Http.readyState == 4) {
                 var json_response = JSON.parse(Http.responseText);
