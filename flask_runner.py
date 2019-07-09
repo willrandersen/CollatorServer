@@ -345,7 +345,15 @@ def show_past_search(task_id):
     #    return 'Forbidden'
 
     if search_object.status != 'SUCCESS':
-        return 'File Unready'
+        res = AsyncResult(task_id, app=cel)
+        search_object.status = str(res.state)
+        if str(res.state) == 'SUCCESS':
+            output_table, header = res.get()
+            search_object.search_completed = datetime.datetime.now(datetime.timezone.utc)
+            search_object.table_data = (output_table, header)
+            db.session.commit()
+        else:
+            return 'File Unready'
     table, header = search_object.table_data
 
     response_file = open('HTML_pages/load_search_template.html')
@@ -375,8 +383,8 @@ def send_loaded_file(task_id):
     if search_object is None:
         return 'Invalid Request'
 
-    if user_object.user_name != search_object.user_name:
-        return 'Forbidden', 403
+    # if user_object.user_name != search_object.user_name:
+    #     return 'Forbidden', 403
 
     if search_object.status != 'SUCCESS':
         return 'File Unready'

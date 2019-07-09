@@ -6,6 +6,7 @@
 <script type="text/javascript">
     let loading = false;
     let dot_count = 1;
+
     function change_dots() {
         if (loading) {
             setTimeout(change_dots, 500);
@@ -65,8 +66,27 @@
 
 <input type="text" id="Username" placeholder="Username"> <br> <br>
 <input type="password" id="Password" placeholder="Password"> <br> <br>
-<button onclick='login_request()' type="button" name="button">Login!</button>
+<button id="login_button" onclick='login_request()' type="button" name="button">Login!</button>
 <br> <br>
+
+<script type="text/javascript">
+    let username_box = document.getElementById('Username');
+    let password_box = document.getElementById('Password');
+
+    password_box.addEventListener("keyup", function (event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            document.getElementById("login_button").click();
+        }
+    });
+
+    username_box.addEventListener("keyup", function (event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            document.getElementById("login_button").click();
+        }
+    });
+</script>
 
 <p id="paragraph_out"></p>
 </html>
