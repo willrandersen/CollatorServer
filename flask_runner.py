@@ -325,7 +325,7 @@ def check_status(task_id):
         df.columns = header
         return df.to_html(index=False)
     else:
-        return '{"status" : "' + str(res.state) + '"'
+        return '{"status" : "' + str(res.state) + '"}'
 
 
 @app.route('/load_search/<task_id>')
