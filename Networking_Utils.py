@@ -95,7 +95,7 @@ def MOL_Search_FO(session, FO):
                       'lb_search_type': 'CustomerNumber',
                       'tb_custvalue': '', 'lb_ship_to_address': 'ALL', 'lb_search_number': 'FONumber',
                       'tb_searchnumber': FO,
-                      'lb_date_type': 'PODATE', 'radio1': '0', 'lb_search_day': 700,
+                      'lb_date_type': 'PODATE', 'radio1': '0', 'lb_search_day': 1092,
                       'lb_order_status': 'ALL', 'lb_order_type': 'A', 'btn_search': 'Search'
                       }
     search_request = session.post(MOL_url_POST_Search, data=search_payload)
