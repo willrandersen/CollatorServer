@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import requests
 from threading import Thread
 from Networking_Utils import *
+from Additional_methods import GetProjectSCs, GetProjectName, GetConfirmationNums, GetCustomerNumber
 
 def merge_MOL_DS(DS_table, MOL_table, MOL_header):
     MOL_header.append('Internal Comments (DS Items)')
@@ -125,52 +126,109 @@ def isFO(input):
             return False
     return True
 
+def isProjectOrder(input):
+    return ':' in input
+
+
 cel = Celery()
 cel.config_from_object('celery_settings')
 
 
 
+# @cel.task()
+# def do_table_parsing(request_dict, session):
+#     data_dict = {}
+#     for each_input in request_dict.keys():
+#         inputIsFo = isFO(each_input)
+#         SC = None
+#         if inputIsFo:
+#             FO_Info = MOL_Search_FO(session, each_input)
+#             SC = FO_Info['Confirmation Number']
+#             if not request_dict[each_input]:
+#                 data_dict[each_input] = FO_Info
+#         else:
+#             SC = each_input
+#             if not request_dict[each_input]:
+#                 data_dict[each_input] = False
+#         if request_dict[each_input]:
+#             Additional_SCs = GetCustomerNumber(SC, session)
+#             for each_SC in Additional_SCs:
+#                 data_dict[each_SC] = False
+#
+#     rows_to_print = []
+#     MOL_header = None
+#     print('progress_1')
+#     for each_requested_data in data_dict.keys():
+#         if type(data_dict[each_requested_data]) == type({}):  # Is an FO
+#             Confirm_Number = data_dict[each_requested_data]['Confirmation Number']
+#             print('progress_2')
+#             MOL_header, MOL_table = MOL_Order_Status(session, Confirm_Number, each_requested_data)
+#             print('progress_3')
+#             #DS_table = getDSDict(each_requested_data)
+#             #merge_MOL_DS(DS_table, MOL_table, MOL_header)
+#             print('progress_4')
+#             add_shipping_data(MOL_table, MOL_header, Confirm_Number, session)
+#             rows_to_print.extend(MOL_table)
+#         else:
+#             MOL_header, MOL_table = MOL_Order_Status(session, each_requested_data)
+#             #DS_table = getDSDict_from_SC(each_requested_data)
+#             #merge_MOL_DS(DS_table, MOL_table, MOL_header)
+#             add_shipping_data(MOL_table, MOL_header, each_requested_data, session)
+#             rows_to_print.extend(MOL_table)
+#
+#     output_table = [[""] * len(MOL_header) for i in range(len(rows_to_print))]
+#
+#     sort_table(rows_to_print)
+#
+#     for each_row_value in range(len(rows_to_print)):
+#         for each_col_value in range(len(MOL_header)):
+#             output_table[each_row_value][each_col_value] = rows_to_print[each_row_value][MOL_header[each_col_value]]
+#     return output_table, MOL_header
+
 @cel.task()
 def do_table_parsing(request_dict, session):
-    data_dict = {}
-    for each_input in request_dict.keys():
-        inputIsFo = isFO(each_input)
-        SC = None
-        if inputIsFo:
-            FO_Info = MOL_Search_FO(session, each_input)
-            SC = FO_Info['Confirmation Number']
-            if not request_dict[each_input]:
-                data_dict[each_input] = FO_Info
-        else:
-            SC = each_input
-            if not request_dict[each_input]:
-                data_dict[each_input] = False
-        if request_dict[each_input]:
-            Additional_SCs = GetCustomerNumber(SC, session)
-            for each_SC in Additional_SCs:
-                data_dict[each_SC] = False
-
     rows_to_print = []
     MOL_header = None
-    print('progress_1')
-    for each_requested_data in data_dict.keys():
-        if type(data_dict[each_requested_data]) == type({}):  # Is an FO
-            Confirm_Number = data_dict[each_requested_data]['Confirmation Number']
-            print('progress_2')
-            MOL_header, MOL_table = MOL_Order_Status(session, Confirm_Number, each_requested_data)
-            print('progress_3')
-            #DS_table = getDSDict(each_requested_data)
-            #merge_MOL_DS(DS_table, MOL_table, MOL_header)
-            print('progress_4')
-            add_shipping_data(MOL_table, MOL_header, Confirm_Number, session)
-            rows_to_print.extend(MOL_table)
-        else:
-            MOL_header, MOL_table = MOL_Order_Status(session, each_requested_data)
-            #DS_table = getDSDict_from_SC(each_requested_data)
-            #merge_MOL_DS(DS_table, MOL_table, MOL_header)
-            add_shipping_data(MOL_table, MOL_header, each_requested_data, session)
-            rows_to_print.extend(MOL_table)
+    for each_input in request_dict.keys():
+        if isProjectOrder(each_input):
+            item_data = each_input.split(':')
 
+            cust_num = item_data[0].strip()
+            proj_name = item_data[1].strip()
+
+            possible_other_SCs = GetConfirmationNums(cust_num, session)
+            project_SCs = GetProjectSCs(proj_name, possible_other_SCs, session)
+
+            for each_proj_SC in project_SCs:
+                MOL_header, MOL_table = MOL_Order_Status(session, each_proj_SC)
+                add_shipping_data(MOL_table, MOL_header, each_proj_SC, session)
+                rows_to_print.extend(MOL_table)
+            continue
+        FO = ""
+        SC = None
+        MOL_table = None
+        if isFO(each_input):
+            FO = each_input
+            FO_Info = MOL_Search_FO(session, each_input)
+            SC = FO_Info['Confirmation Number']
+            MOL_header, MOL_table = MOL_Order_Status(session, SC, FO)
+        else:
+            SC = each_input
+            MOL_header, MOL_table = MOL_Order_Status(session, SC)
+        add_shipping_data(MOL_table, MOL_header, SC, session)
+        rows_to_print.extend(MOL_table)
+        if request_dict[each_input]:
+            cust_num = GetCustomerNumber(SC, session)
+            possible_other_SCs = GetConfirmationNums(cust_num, session)
+
+            proj_name = GetProjectName(SC, session)
+
+            project_SCs = GetProjectSCs(proj_name, possible_other_SCs, session, SC)
+
+            for each_proj_SC in project_SCs:
+                MOL_header, MOL_table = MOL_Order_Status(session, each_proj_SC)
+                add_shipping_data(MOL_table, MOL_header, each_proj_SC, session)
+                rows_to_print.extend(MOL_table)
     output_table = [[""] * len(MOL_header) for i in range(len(rows_to_print))]
 
     sort_table(rows_to_print)
