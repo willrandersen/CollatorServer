@@ -259,11 +259,11 @@ def do_table_parsing(request_dict, session, sort_method):
                 rows_to_print.extend(MOL_table)
     output_table = [[""] * len(MOL_header) for i in range(len(rows_to_print))]
 
-    if sort_method == 1:
+    if sort_method == '1':
         sort_by_unshipped(rows_to_print)
-    elif sort_method == 2:
+    elif sort_method == '2':
         sort_by_serial(rows_to_print)
-    elif sort_method == 3:
+    elif sort_method == '3':
         sort_by_tracking(rows_to_print)
     else:
         pass    # automatically sorted in FOs
