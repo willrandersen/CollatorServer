@@ -366,7 +366,7 @@ def show_past_search(task_id):
 
     time_delt = datetime.timedelta(hours=5)
 
-    response_html = template.format(task_id, search_object.user_name, (search_object.search_started - time_delt).strftime("%b %d %Y %H:%M:%S") + " CDT </td>", get_bolded_dict_string(search_object.items_searched),task_id,table_html_string)
+    response_html = template.format(task_id, search_object.user_name, (search_object.search_started - time_delt).strftime("%b %d %Y %H:%M:%S") + " CDT", get_bolded_dict_string(search_object.items_searched),task_id,table_html_string)
     return response_html
 
 @app.route('/download/<task_id>')

@@ -52,7 +52,7 @@
                     const table_div = document.getElementById("table_area");
                     //let download_button = document.createElement("button");
                     table_div.insertAdjacentHTML('afterbegin', response);
-                    table_div.insertAdjacentHTML('afterbegin', "<button onclick=\"window.location.href = '/download/" + task_ID + "';\">Download</button> <br><br>");
+                    table_div.insertAdjacentHTML('afterbegin', "<button onclick=\"window.location.href = '/download/" + task_ID + "';\">Export to Excel</button> <br><br>");
                     running_search = false;
                     let add_row_button = document.getElementById("add_point_button");
                     add_row_button.disabled = false;
@@ -147,7 +147,13 @@
     customer number, followed by a colon, followed by the project name("1036808460:NYS16I101A", "1036311819:NE-14I103A",
     or "1035663683:Il-16I147A") <br> <br>When completed results will be displayed below. They'll also be available on
     the home screen.</p><br>
-
+Sort by: <select>
+  <option value="FO_sort">FO and Line Item</option>
+  <option value="Ship_sort">Unshipped Items</option>
+  <option value="Serial_sort">Items with Serial Numbers</option>
+  <option value="Tracking_sort">Items with Tracking Information</option>
+</select>
+<br> <br>
 <div id="button_area"></div>
 <br>
 <button onclick='add_row()' type="button" id="add_point_button" name="button">Add Additional Data Point</button>
