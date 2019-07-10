@@ -282,7 +282,10 @@ def run_search():
         return 'Invalid Response', 400
     requested_with_cookie = request.cookies.get('logged_in_cookie')
     user_searched = User.query.filter_by(cookie=requested_with_cookie).first()
-    async_req = do_table_parsing.delay(searched_data_dict, user_searched.session)
+
+    sort_method = request.form['sort_val']
+
+    async_req = do_table_parsing.delay(searched_data_dict, user_searched.session, sort_method)
 
     print('Search status 2')
 

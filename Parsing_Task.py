@@ -107,12 +107,40 @@ def getDSDict_from_SC(SC):
         table.extend(each_FO)
     return table
 
+def sort_by_serial(rows):
+    last_serial_item = 0
+    for index in range(len(rows)):
+        current_item = rows[index]
+        if current_item['Serial Codes'] != '(No serial numbers available)':
+            rows.remove(current_item)
+            rows.insert(last_serial_item, current_item)
+            last_serial_item += 1
 
-def sort_table(rows):
+
+def sort_by_tracking(rows):
+    last_full_data_item = 0
+    last_partial_data_item = 0
+    for index in range(len(rows)):
+        current_item = rows[index]
+        tracking_info = current_item['Tracking Information'].split('-')
+        if tracking_info[0] == '' and tracking_info[1] == '':
+            continue
+        if tracking_info[1] == '(No tracking number available)':
+            rows.remove(current_item)
+            rows.insert(last_partial_data_item, current_item)
+            last_partial_data_item += 1
+        else:
+            rows.remove(current_item)
+            rows.insert(last_full_data_item, current_item)
+            last_partial_data_item += 1
+            last_full_data_item += 1
+
+
+def sort_by_unshipped(rows):
     last_unshipped_item = 0
     for index in range(len(rows)):
         current_item = rows[index]
-        if current_item['Hold Code'] == 'Booked' or current_item['Hold Code'] == '':
+        if int(current_item['Qty. Open']) > 0:
             rows.remove(current_item)
             rows.insert(last_unshipped_item, current_item)
             last_unshipped_item += 1
@@ -186,7 +214,7 @@ cel.config_from_object('celery_settings')
 #     return output_table, MOL_header
 
 @cel.task()
-def do_table_parsing(request_dict, session):
+def do_table_parsing(request_dict, session, sort_method):
     rows_to_print = []
     MOL_header = None
     for each_input in request_dict.keys():
@@ -231,7 +259,14 @@ def do_table_parsing(request_dict, session):
                 rows_to_print.extend(MOL_table)
     output_table = [[""] * len(MOL_header) for i in range(len(rows_to_print))]
 
-    sort_table(rows_to_print)
+    if sort_method == 1:
+        sort_by_unshipped(rows_to_print)
+    elif sort_method == 2:
+        sort_by_serial(rows_to_print)
+    elif sort_method == 3:
+        sort_by_tracking(rows_to_print)
+    else:
+        pass    # automatically sorted in FOs
 
     for each_row_value in range(len(rows_to_print)):
         for each_col_value in range(len(MOL_header)):
