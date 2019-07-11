@@ -9,6 +9,9 @@
             text-indent: 40px;
             margin: 2px;
         }}
+        .search_area{{
+            text-indent: 30px;
+        }}
     </style>
 </head>
 <script type="text/javascript">
@@ -173,19 +176,19 @@ Sort by: <select id="sort_selector">
     <option value="3">Items with Tracking Information</option>
 </select>
 <br> <br>
-<div id="button_area"></div>
+<div class="search_area" id="button_area"></div>
 <br>
-<button onclick='add_row()' type="button" id="add_point_button" name="button">Add Additional Data Point</button>
+<button class="search_area" onclick='add_row()' type="button" id="add_point_button" name="button">Add Additional Data Point</button>
 <br> <br>
-<button onclick='submit_search()' type="button" name="submit">Start Collator</button>
+<button class="search_area" onclick='submit_search()' type="button" name="submit">Start Collator</button>
 <br>
 <p id="paragraph_out"></p>
 <div id="table_area"></div>
 <br>
 <br>
 <br>
-<button onclick="window.location = '/Main';">Back to Home</button>
-<button onclick="send_logout()">Log Out</button>
+<button class="search_area" onclick="window.location = '/Main';">Back to Home</button>
+<button class="search_area" onclick="send_logout()">Log Out</button>
 
 <script type="text/javascript">
     add_row();

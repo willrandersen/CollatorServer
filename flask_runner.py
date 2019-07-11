@@ -157,8 +157,8 @@ def get_detailed_search_info_html(dict):
             for each_other_SC in dict[each_entry][1:-2]:
                 string_builder += each_other_SC + ', '
             string_builder = string_builder[:-2]
-            string_builder += '<p class="subdata">Customer Number: ' + dict[each_entry][-1] + '</p>'
-            string_builder += '<p class="subdata">Project Name: ' + dict[each_entry][-2] + '</p>'
+            string_builder += '<p class="subdata" style="text-indent: 40px; margin: 2px;">Customer Number: ' + dict[each_entry][-1] + '</p>'
+            string_builder += '<p class="subdata" style="text-indent: 40px; margin: 2px;">Project Name: ' + dict[each_entry][-2] + '</p>'
         if dict[each_entry][0] == 'proj_search':
             string_builder += "Project search on <b>" + each_entry + "</b>: SCs on project: "
             for each_other_SC in dict[each_entry][1:-2]:
