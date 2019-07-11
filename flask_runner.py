@@ -148,6 +148,8 @@ def remove_outdated(username):
 def get_detailed_search_info_html(dict):
     string_builder = '<h3>Search Meta Data:</h3>'
     for each_entry in dict.keys():
+        if dict[each_entry][0] == 'No_Data_Found':
+            string_builder += 'No data found for ' + each_entry
         if dict[each_entry][0] == 'single_fo_search':
             string_builder += 'Singe FO search on ' + each_entry + " from List ID " + dict[each_entry][1]
         if dict[each_entry][0] == 'single_listid_search':
@@ -173,6 +175,8 @@ def get_bolded_dict_string(dict):
     for each_entry in dict.keys():
         if (type(dict[each_entry]) == type([]) and 'single' not in dict[each_entry][0]) or (dict[each_entry] and type(dict[each_entry]) != type([])):
             string_builder += "<b>" + each_entry + "</b>"
+        elif type(dict[each_entry]) == type([]) and 'No_Data_Found' == dict[each_entry][0]:
+            string_builder += "<i>" + each_entry + "</i>"
         else:
             string_builder += each_entry
         string_builder += ', '
