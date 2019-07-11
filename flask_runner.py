@@ -163,7 +163,7 @@ def get_detailed_search_info_html(dict):
             string_builder += '<p class="subdata">Project Name: ' + dict[each_entry][-2] + '</p>'
         if dict[each_entry][0] == 'proj_search':
             string_builder += "Project search on <b>" + each_entry + "</b>: SCs on project: "
-            for each_other_SC in dict[each_entry][1:-2]:
+            for each_other_SC in dict[each_entry][1]:
                 string_builder += each_other_SC + ', '
             string_builder = string_builder[:-2]
         string_builder += '<br>'
