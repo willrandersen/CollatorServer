@@ -1,4 +1,5 @@
-from celery import Celery
+from celery import Celery, states
+from celery.exceptions import Ignore
 from bs4 import BeautifulSoup
 import requests
 from threading import Thread
@@ -217,7 +218,7 @@ cel.config_from_object('celery_settings')
 
 @cel.task(bind = True)
 def do_table_parsing(self, request_dict, session, sort_method):
-    self.update_state(state='BEGAN')
+    self.update_state(state='RUNNING')
     rows_to_print = []
     MOL_header = None
 
@@ -285,7 +286,13 @@ def do_table_parsing(self, request_dict, session, sort_method):
             search_meta_data[each_input] = each_data_point_meta_data
 
     if MOL_header is None:
-        return '','',''
+        self.update_state(
+            state=states.FAILURE,
+            meta={
+                'exc_type': 'Invalid_Search',
+                'exc_message': 'No search was able to pull data',
+            })
+        raise Ignore()
 
     output_table = [[""] * len(MOL_header) for i in range(len(rows_to_print))]
 
