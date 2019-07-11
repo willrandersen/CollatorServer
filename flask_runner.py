@@ -149,16 +149,16 @@ def get_detailed_search_info_html(dict):
     string_builder = '<h3>Search Meta Data:</h3>'
     for each_entry in dict.keys():
         if dict[each_entry][0] == 'single_fo_search':
-            string_builder += each_entry + " - List ID: " + dict[each_entry][1]
+            string_builder += 'Singe FO search on ' + each_entry + "from List ID: " + dict[each_entry][1]
         if dict[each_entry][0] == 'single_listid_search':
-            string_builder += each_entry
+            string_builder += 'Single List ID search on ' + each_entry
         if dict[each_entry][0] == 'advanced_proj_search':
             string_builder += "Project search on <b>" + each_entry + "</b>: SCs on project: "
             for each_other_SC in dict[each_entry][1:-2]:
                 string_builder += each_other_SC + ', '
             string_builder = string_builder[:-2]
-            string_builder += '<br>     Customer Number: ' + dict[each_entry][-1]
-            string_builder += '<br>     Project Name: ' + dict[each_entry][-2]
+            string_builder += '<p style="text-indent: 40px">Customer Number: ' + dict[each_entry][-1] + '</p>'
+            string_builder += '<p style="text-indent: 40px">Project Name: ' + dict[each_entry][-2] + '</p>'
         if dict[each_entry][0] == 'proj_search':
             string_builder += "Project search on <b>" + each_entry + "</b>: SCs on project: "
             for each_other_SC in dict[each_entry][1:-2]:
