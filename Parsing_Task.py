@@ -4,6 +4,8 @@ import requests
 from threading import Thread
 from Networking_Utils import *
 from Additional_methods import GetProjectSCs, GetProjectName, GetConfirmationNums, GetCustomerNumber
+from Parsing_Errors import NoValidInputs,DatapointNotFound
+
 
 def merge_MOL_DS(DS_table, MOL_table, MOL_header):
     MOL_header.append('Internal Comments (DS Items)')
@@ -213,8 +215,9 @@ cel.config_from_object('celery_settings')
 #             output_table[each_row_value][each_col_value] = rows_to_print[each_row_value][MOL_header[each_col_value]]
 #     return output_table, MOL_header
 
-@cel.task()
-def do_table_parsing(request_dict, session, sort_method):
+@cel.task(bind = True)
+def do_table_parsing(self, request_dict, session, sort_method):
+    self.update_state(state='BEGAN')
     rows_to_print = []
     MOL_header = None
 
@@ -223,59 +226,66 @@ def do_table_parsing(request_dict, session, sort_method):
     for each_input in request_dict.keys():
         each_data_point_meta_data = []
 
-        if isProjectOrder(each_input):
-            item_data = each_input.split(':')
+        try:
+            if isProjectOrder(each_input):
+                item_data = each_input.split(':')
 
-            cust_num = item_data[0].strip()
-            proj_name = item_data[1].strip()
+                cust_num = item_data[0].strip()
+                proj_name = item_data[1].strip()
 
-            possible_other_SCs = GetConfirmationNums(cust_num, session)
-            project_SCs = GetProjectSCs(proj_name, possible_other_SCs, session)
+                possible_other_SCs = GetConfirmationNums(cust_num, session)
+                project_SCs = GetProjectSCs(proj_name, possible_other_SCs, session)
 
-            each_data_point_meta_data.append('proj_search')
-            each_data_point_meta_data.extend(project_SCs)
+                each_data_point_meta_data.append('proj_search')
+                each_data_point_meta_data.extend(project_SCs)
+                search_meta_data[each_input] = each_data_point_meta_data
+                for each_proj_SC in project_SCs:
+                    MOL_header, MOL_table = MOL_Order_Status(session, each_proj_SC)
+                    add_shipping_data(MOL_table, MOL_header, each_proj_SC, session)
+                    rows_to_print.extend(MOL_table)
+                continue
+            FO = ""
+            SC = None
+            MOL_table = None
+            if isFO(each_input):
+                each_data_point_meta_data.append("single_fo_search")
+                FO = each_input
+                FO_Info = MOL_Search_FO(session, each_input)
+                SC = FO_Info['Confirmation Number']
+                MOL_header, MOL_table = MOL_Order_Status(session, SC, FO)
+
+                each_data_point_meta_data.append(SC)
+            else:
+                each_data_point_meta_data.append("single_listid_search")
+                SC = each_input
+                MOL_header, MOL_table = MOL_Order_Status(session, SC)
+            add_shipping_data(MOL_table, MOL_header, SC, session)
+            rows_to_print.extend(MOL_table)
+            if request_dict[each_input]:
+                each_data_point_meta_data[0] = "advanced_proj_search"
+
+                cust_num = GetCustomerNumber(SC, session)
+                possible_other_SCs = GetConfirmationNums(cust_num, session)
+
+                proj_name = GetProjectName(SC, session)
+
+                project_SCs = GetProjectSCs(proj_name, possible_other_SCs, session, SC)
+
+                each_data_point_meta_data.extend(project_SCs)
+                each_data_point_meta_data.append(proj_name)
+                each_data_point_meta_data.append(cust_num)
+
+                for each_proj_SC in project_SCs:
+                    MOL_header, MOL_table = MOL_Order_Status(session, each_proj_SC)
+                    add_shipping_data(MOL_table, MOL_header, each_proj_SC, session)
+                    rows_to_print.extend(MOL_table)
             search_meta_data[each_input] = each_data_point_meta_data
-            for each_proj_SC in project_SCs:
-                MOL_header, MOL_table = MOL_Order_Status(session, each_proj_SC)
-                add_shipping_data(MOL_table, MOL_header, each_proj_SC, session)
-                rows_to_print.extend(MOL_table)
-            continue
-        FO = ""
-        SC = None
-        MOL_table = None
-        if isFO(each_input):
-            FO = each_input
-            FO_Info = MOL_Search_FO(session, each_input)
-            SC = FO_Info['Confirmation Number']
-            MOL_header, MOL_table = MOL_Order_Status(session, SC, FO)
-            each_data_point_meta_data.append("single_fo_search")
+        except (DatapointNotFound,IndexError):
+            each_data_point_meta_data[0] = "No_Data_Found"
+            search_meta_data[each_input] = each_data_point_meta_data
 
-            each_data_point_meta_data.append(SC)
-        else:
-            each_data_point_meta_data.append("single_listid_search")
-            SC = each_input
-            MOL_header, MOL_table = MOL_Order_Status(session, SC)
-        add_shipping_data(MOL_table, MOL_header, SC, session)
-        rows_to_print.extend(MOL_table)
-        if request_dict[each_input]:
-            each_data_point_meta_data[0] = "advanced_proj_search"
-
-            cust_num = GetCustomerNumber(SC, session)
-            possible_other_SCs = GetConfirmationNums(cust_num, session)
-
-            proj_name = GetProjectName(SC, session)
-
-            project_SCs = GetProjectSCs(proj_name, possible_other_SCs, session, SC)
-
-            each_data_point_meta_data.extend(project_SCs)
-            each_data_point_meta_data.append(proj_name)
-            each_data_point_meta_data.append(cust_num)
-
-            for each_proj_SC in project_SCs:
-                MOL_header, MOL_table = MOL_Order_Status(session, each_proj_SC)
-                add_shipping_data(MOL_table, MOL_header, each_proj_SC, session)
-                rows_to_print.extend(MOL_table)
-        search_meta_data[each_input] = each_data_point_meta_data
+    if MOL_header is None:
+        return '','',''
 
     output_table = [[""] * len(MOL_header) for i in range(len(rows_to_print))]
 
