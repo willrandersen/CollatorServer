@@ -146,21 +146,21 @@ def remove_outdated(username):
     db.session.commit()
 
 def get_detailed_search_info_html(dict):
-    string_builder = ''
+    string_builder = '<h3>Search Meta Data:</h3>'
     for each_entry in dict.keys():
         if dict[each_entry][0] == 'single_fo_search':
-            string_builder += each_entry + " - SC: " + dict[each_entry][1]
+            string_builder += each_entry + " - List ID: " + dict[each_entry][1]
         if dict[each_entry][0] == 'single_listid_search':
             string_builder += each_entry
         if dict[each_entry][0] == 'advanced_proj_search':
-            string_builder += "Project search on <b>" + each_entry + "</b>, SCs on project: "
+            string_builder += "Project search on <b>" + each_entry + "</b>: SCs on project: "
             for each_other_SC in dict[each_entry][1:-2]:
                 string_builder += each_other_SC + ', '
             string_builder = string_builder[:-2]
             string_builder += '<br>     Customer Number: ' + dict[each_entry][-1]
             string_builder += '<br>     Project Name: ' + dict[each_entry][-2]
         if dict[each_entry][0] == 'proj_search':
-            string_builder += "Project search on <b>" + each_entry + "</b>, SCs on project: "
+            string_builder += "Project search on <b>" + each_entry + "</b>: SCs on project: "
             for each_other_SC in dict[each_entry][1:-2]:
                 string_builder += each_other_SC + ', '
             string_builder = string_builder[:-2]
@@ -171,7 +171,7 @@ def get_detailed_search_info_html(dict):
 def get_bolded_dict_string(dict):
     string_builder = ''
     for each_entry in dict.keys():
-        if (type(dict[each_entry]) == type([]) and 'single' not in dict[each_entry][0]) or dict[each_entry]:
+        if (type(dict[each_entry]) == type([]) and 'single' not in dict[each_entry][0]) or (dict[each_entry] and type(dict[each_entry]) != type([])):
             string_builder += "<b>" + each_entry + "</b>"
         else:
             string_builder += each_entry
@@ -396,7 +396,7 @@ def show_past_search(task_id):
 
     time_delt = datetime.timedelta(hours=5)
 
-    response_html = template.format(task_id, search_object.user_name, (search_object.search_started - time_delt).strftime("%b %d %Y %H:%M:%S") + " CDT", get_bolded_dict_string(search_object.items_searched),task_id,table_html_string)
+    response_html = template.format(task_id, search_object.user_name, (search_object.search_started - time_delt).strftime("%b %d %Y %H:%M:%S") + " CDT", get_detailed_search_info_html(search_object.items_searched),task_id,table_html_string)
     return response_html
 
 @app.route('/download/<task_id>')
