@@ -145,15 +145,31 @@ def remove_outdated(username):
             User.query.filter_by(cookie=each_login.cookie).delete()
     db.session.commit()
 
-def get_detailed_search_info(dict):
+def get_detailed_search_info_html(dict):
     string_builder = ''
-
+    for each_entry in dict.keys():
+        if dict[each_entry][0] == 'single_fo_search':
+            string_builder += each_entry + " - SC: " + dict[each_entry][1]
+        if dict[each_entry][0] == 'single_listid_search':
+            string_builder += each_entry
+        if dict[each_entry][0] == 'advanced_proj_search':
+            string_builder += "Project search on <b>" + each_entry + "</b>, SCs on project: "
+            for each_other_SC in dict[each_entry][1:-2]:
+                string_builder += each_other_SC + ', '
+            string_builder = string_builder[:-2]
+            string_builder += '<br>     Customer Number: ' + dict[each_entry][-1]
+            string_builder += '<br>     Project Name: ' + dict[each_entry][-2]
+        if dict[each_entry][0] == 'proj_search':
+            string_builder += "Project search on <b>" + each_entry + "</b>, SCs on project: "
+            for each_other_SC in dict[each_entry][1:-2]:
+                string_builder += each_other_SC + ', '
+            string_builder = string_builder[:-2]
 
 
 def get_bolded_dict_string(dict):
     string_builder = ''
     for each_entry in dict.keys():
-        if (type(dict[each_entry]) == type([]) and 'single' in dict[each_entry][0]) or dict[each_entry]:
+        if (type(dict[each_entry]) == type([]) and 'single' not in dict[each_entry][0]) or dict[each_entry]:
             string_builder += "<b>" + each_entry + "</b>"
         else:
             string_builder += each_entry
@@ -332,7 +348,7 @@ def check_status(task_id):
         pd.set_option('display.max_colwidth', -1)
         df = pd.DataFrame(output_table)
         df.columns = header
-        return df.to_html(index=False)
+        return get_detailed_search_info_html(metadata) + '<br><br>' + df.to_html(index=False)
     else:
         search_object.status = str(res.state)
         db.session.commit()
