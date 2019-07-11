@@ -232,6 +232,7 @@ def do_table_parsing(request_dict, session, sort_method):
             possible_other_SCs = GetConfirmationNums(cust_num, session)
             project_SCs = GetProjectSCs(proj_name, possible_other_SCs, session)
 
+            each_data_point_meta_data.append('proj_search')
             each_data_point_meta_data.extend(project_SCs)
             search_meta_data[each_input] = each_data_point_meta_data
             for each_proj_SC in project_SCs:
@@ -247,14 +248,17 @@ def do_table_parsing(request_dict, session, sort_method):
             FO_Info = MOL_Search_FO(session, each_input)
             SC = FO_Info['Confirmation Number']
             MOL_header, MOL_table = MOL_Order_Status(session, SC, FO)
+            each_data_point_meta_data.append("single_fo_search")
+
             each_data_point_meta_data.append(SC)
         else:
+            each_data_point_meta_data.append("single_listid_search")
             SC = each_input
             MOL_header, MOL_table = MOL_Order_Status(session, SC)
         add_shipping_data(MOL_table, MOL_header, SC, session)
         rows_to_print.extend(MOL_table)
         if request_dict[each_input]:
-            each_data_point_meta_data.insert(0, "advanced_proj_search")
+            each_data_point_meta_data[0] = "advanced_proj_search"
 
             cust_num = GetCustomerNumber(SC, session)
             possible_other_SCs = GetConfirmationNums(cust_num, session)
