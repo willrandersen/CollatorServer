@@ -153,7 +153,7 @@ def get_detailed_search_info(dict):
 def get_bolded_dict_string(dict):
     string_builder = ''
     for each_entry in dict.keys():
-        if 'single' in dict[each_entry][0]:
+        if (type(dict[each_entry]) == type([]) and 'single' in dict[each_entry][0]) or dict[each_entry]:
             string_builder += "<b>" + each_entry + "</b>"
         else:
             string_builder += each_entry
