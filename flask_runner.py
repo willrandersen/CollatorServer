@@ -164,6 +164,8 @@ def get_detailed_search_info_html(dict):
             for each_other_SC in dict[each_entry][1:-2]:
                 string_builder += each_other_SC + ', '
             string_builder = string_builder[:-2]
+        string_builder += '<br>'
+    return string_builder
 
 
 def get_bolded_dict_string(dict):
