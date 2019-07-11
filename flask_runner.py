@@ -214,7 +214,7 @@ def update_unresolved_searches(username):
         if duration_seconds > 60 * 60 * 24 * 7:
             Search.query.filter_by(task_id=task_id).delete()
             continue
-        if each_search.status != 'SUCCESS':
+        if each_search.status != 'SUCCESS' and each_search.status != 'FAILURE':
             res = AsyncResult(task_id, app=cel)
             each_search.status = str(res.state)
             if str(res.state) == 'SUCCESS':
@@ -222,6 +222,7 @@ def update_unresolved_searches(username):
                 each_search.items_searched = metadata
                 each_search.search_completed = datetime.datetime.now(datetime.timezone.utc)
                 each_search.table_data = (output_table, header)
+                res.forget()
     db.session.commit()
 
 
@@ -341,6 +342,16 @@ def check_status(task_id):
     if user_object.user_name != search_object.user_name:
         return 'Forbidden', 403
 
+    if search_object.status == 'SUCCESS':
+        output_table, header = search_object.table_data
+        metadata = search_object.items_searched
+
+        pd.set_option('display.max_colwidth', -1)
+        df = pd.DataFrame(output_table)
+        df.columns = header
+        return get_detailed_search_info_html(metadata) + '<br><br>' + df.to_html(index=False)
+
+
     res = AsyncResult(task_id, app=cel)
     print(res.info)
     if str(res.state) == 'SUCCESS':
@@ -352,6 +363,7 @@ def check_status(task_id):
         search_object.table_data = (output_table, header)
         db.session.commit()
 
+        res.forget()
         pd.set_option('display.max_colwidth', -1)
         df = pd.DataFrame(output_table)
         df.columns = header
@@ -387,6 +399,7 @@ def show_past_search(task_id):
             search_object.search_completed = datetime.datetime.now(datetime.timezone.utc)
             search_object.table_data = (output_table, header)
             db.session.commit()
+            res.forget()
         else:
             return 'File Unready'
     table, header = search_object.table_data
