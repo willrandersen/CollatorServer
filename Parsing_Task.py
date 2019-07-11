@@ -223,10 +223,12 @@ def do_table_parsing(self, request_dict, session, sort_method):
     MOL_header = None
 
     search_meta_data = {}
-
+    count = 0
+    length_of_dict = len(request_dict)
     for each_input in request_dict.keys():
         each_data_point_meta_data = []
-
+        self.update_state(state='RUNNING', meta={'done': count, 'total': length_of_dict})
+        count += 1
         try:
             if isProjectOrder(each_input):
                 item_data = each_input.split(':')

@@ -342,6 +342,7 @@ def check_status(task_id):
         return 'Forbidden', 403
 
     res = AsyncResult(task_id, app=cel)
+    print(res.info)
     if str(res.state) == 'SUCCESS':
         output_table, header, metadata = res.get()
         search_object.items_searched = metadata
