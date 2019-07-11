@@ -217,7 +217,12 @@ cel.config_from_object('celery_settings')
 def do_table_parsing(request_dict, session, sort_method):
     rows_to_print = []
     MOL_header = None
+
+    search_meta_data = {}
+
     for each_input in request_dict.keys():
+        each_data_point_meta_data = []
+
         if isProjectOrder(each_input):
             item_data = each_input.split(':')
 
@@ -227,6 +232,8 @@ def do_table_parsing(request_dict, session, sort_method):
             possible_other_SCs = GetConfirmationNums(cust_num, session)
             project_SCs = GetProjectSCs(proj_name, possible_other_SCs, session)
 
+            each_data_point_meta_data.extend(project_SCs)
+            search_meta_data[each_input] = each_data_point_meta_data
             for each_proj_SC in project_SCs:
                 MOL_header, MOL_table = MOL_Order_Status(session, each_proj_SC)
                 add_shipping_data(MOL_table, MOL_header, each_proj_SC, session)
@@ -240,12 +247,15 @@ def do_table_parsing(request_dict, session, sort_method):
             FO_Info = MOL_Search_FO(session, each_input)
             SC = FO_Info['Confirmation Number']
             MOL_header, MOL_table = MOL_Order_Status(session, SC, FO)
+            each_data_point_meta_data.append(SC)
         else:
             SC = each_input
             MOL_header, MOL_table = MOL_Order_Status(session, SC)
         add_shipping_data(MOL_table, MOL_header, SC, session)
         rows_to_print.extend(MOL_table)
         if request_dict[each_input]:
+            each_data_point_meta_data.insert(0, "advanced_proj_search")
+
             cust_num = GetCustomerNumber(SC, session)
             possible_other_SCs = GetConfirmationNums(cust_num, session)
 
@@ -253,10 +263,16 @@ def do_table_parsing(request_dict, session, sort_method):
 
             project_SCs = GetProjectSCs(proj_name, possible_other_SCs, session, SC)
 
+            each_data_point_meta_data.extend(project_SCs)
+            each_data_point_meta_data.append(proj_name)
+            each_data_point_meta_data.append(cust_num)
+
             for each_proj_SC in project_SCs:
                 MOL_header, MOL_table = MOL_Order_Status(session, each_proj_SC)
                 add_shipping_data(MOL_table, MOL_header, each_proj_SC, session)
                 rows_to_print.extend(MOL_table)
+        search_meta_data[each_input] = each_data_point_meta_data
+
     output_table = [[""] * len(MOL_header) for i in range(len(rows_to_print))]
 
     if sort_method == '1':
@@ -271,4 +287,4 @@ def do_table_parsing(request_dict, session, sort_method):
     for each_row_value in range(len(rows_to_print)):
         for each_col_value in range(len(MOL_header)):
             output_table[each_row_value][each_col_value] = rows_to_print[each_row_value][MOL_header[each_col_value]]
-    return output_table, MOL_header
+    return output_table, MOL_header, search_meta_data

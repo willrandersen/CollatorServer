@@ -67,10 +67,10 @@ class Search(db.Model):
         self.search_completed = None
 
     def __repr__(self):
-        return str({'id' : self.id, 'user_name' : self.user_name, 'search_completed_time' : self.search_completed, 'table_data' : self.table_data, 'task_id' : self.task_id})
+        return str({'id' : self.id, 'user_name' : self.user_name, 'search_completed_time' : self.search_completed, 'task_id' : self.task_id})
 
     def serialize(self):
-        return {'id' : self.id, 'user_name' : self.user_name, 'search_completed_time' : self.search_completed, 'task_id' : self.task_id}
+        return {'id' : self.id, 'user_name' : self.user_name, 'search_completed_time' : self.search_completed, 'task_id' : self.task_id, "items_searched" : self.items_searched}
 
 class Login_Error(Enum):
     INVALID = -1
@@ -145,6 +145,10 @@ def remove_outdated(username):
             User.query.filter_by(cookie=each_login.cookie).delete()
     db.session.commit()
 
+def get_detailed_search_info(dict):
+    string_builder = ''
+
+
 
 def get_bolded_dict_string(dict):
     string_builder = ''
@@ -192,7 +196,8 @@ def update_unresolved_searches(username):
             res = AsyncResult(task_id, app=cel)
             each_search.status = str(res.state)
             if str(res.state) == 'SUCCESS':
-                output_table, header = res.get()
+                output_table, header, metadata = res.get()
+                each_search.items_searched = metadata
                 each_search.search_completed = datetime.datetime.now(datetime.timezone.utc)
                 each_search.table_data = (output_table, header)
     db.session.commit()
@@ -267,7 +272,7 @@ def run_search():
     searched_data_dict = {}
     print('Search status 1')
     count = 0
-    while True:
+    while count < 16:
         if 'search_' + str(count) in request.form.keys():
             datapoint = request.form['search_' + str(count)].strip()
             if datapoint == '':
@@ -316,7 +321,8 @@ def check_status(task_id):
 
     res = AsyncResult(task_id, app=cel)
     if str(res.state) == 'SUCCESS':
-        output_table, header = res.get()
+        output_table, header, metadata = res.get()
+        search_object.items_searched = metadata
 
         search_object.status = str(res.state)
         search_object.search_completed = datetime.datetime.now(datetime.timezone.utc)
@@ -328,6 +334,8 @@ def check_status(task_id):
         df.columns = header
         return df.to_html(index=False)
     else:
+        search_object.status = str(res.state)
+        db.session.commit()
         return '{"status" : "' + str(res.state) + '"}'
 
 
@@ -351,7 +359,8 @@ def show_past_search(task_id):
         res = AsyncResult(task_id, app=cel)
         search_object.status = str(res.state)
         if str(res.state) == 'SUCCESS':
-            output_table, header = res.get()
+            output_table, header, metadata = res.get()
+            search_object.items_searched = metadata
             search_object.search_completed = datetime.datetime.now(datetime.timezone.utc)
             search_object.table_data = (output_table, header)
             db.session.commit()
