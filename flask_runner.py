@@ -173,10 +173,10 @@ def get_detailed_search_info_html(dict):
 def get_bolded_dict_string(dict):
     string_builder = ''
     for each_entry in dict.keys():
-        if (type(dict[each_entry]) == type([]) and 'single' not in dict[each_entry][0]) or (dict[each_entry] and type(dict[each_entry]) != type([])):
-            string_builder += "<b>" + each_entry + "</b>"
-        elif type(dict[each_entry]) == type([]) and 'No_Data_Found' == dict[each_entry][0]:
+        if type(dict[each_entry]) == type([]) and 'No_Data_Found' == dict[each_entry][0]:
             string_builder += "<i>" + each_entry + "</i>"
+        elif (type(dict[each_entry]) == type([]) and 'single' not in dict[each_entry][0]) or (dict[each_entry] and type(dict[each_entry]) != type([])):
+            string_builder += "<b>" + each_entry + "</b>"
         else:
             string_builder += each_entry
         string_builder += ', '
