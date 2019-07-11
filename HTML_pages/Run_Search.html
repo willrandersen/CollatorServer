@@ -124,6 +124,16 @@
         entry_div.appendChild(text);
         entry_div.appendChild(checkbox);
         entry_div.appendChild(breakrow);
+
+        text.addEventListener('input', function (evt) {
+            if (this.value.includes(':')) {
+                checkbox.checked = true;
+                checkbox.disabled = true;
+            } else {
+                checkbox.disabled = false;
+            }
+        });
+
         added_count++;
     }
 </script>
@@ -151,10 +161,10 @@
     or "1035663683:Il-16I147A") <br> <br>When completed results will be displayed below. They'll also be available on
     the home screen.</p><br>
 Sort by: <select id="sort_selector">
-  <option value="0">FO and Line Item</option>
-  <option value="1">Unshipped Items</option>
-  <option value="2">Items with Serial Numbers</option>
-  <option value="3">Items with Tracking Information</option>
+    <option value="0">FO and Line Item</option>
+    <option value="1">Unshipped Items</option>
+    <option value="2">Items with Serial Numbers</option>
+    <option value="3">Items with Tracking Information</option>
 </select>
 <br> <br>
 <div id="button_area"></div>

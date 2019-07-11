@@ -238,7 +238,7 @@ def get_main_page():
         return response_file.read()
     response_file = open('HTML_pages/Main_Page.html')
     template = response_file.read()
-
+    response_file.close()
     requested_with_cookie = request.cookies.get('logged_in_cookie')
     user_searched = User.query.filter_by(cookie=requested_with_cookie).first()
 
