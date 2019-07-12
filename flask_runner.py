@@ -217,12 +217,16 @@ def update_unresolved_searches(username):
         if each_search.status != 'SUCCESS' and each_search.status != 'FAILURE':
             res = AsyncResult(task_id, app=cel)
             each_search.status = str(res.state)
-            if str(res.state) == 'SUCCESS':
+            if each_search.status == 'SUCCESS':
                 output_table, header, metadata = res.get()
                 each_search.items_searched = metadata
                 each_search.search_completed = datetime.datetime.now(datetime.timezone.utc)
                 each_search.table_data = (output_table, header)
                 res.forget()
+            if each_search.status == 'FAILURE':
+                each_search.search_completed = datetime.datetime.now(datetime.timezone.utc)
+                res.forget()
+
     db.session.commit()
 
 
@@ -350,26 +354,39 @@ def check_status(task_id):
         df = pd.DataFrame(output_table)
         df.columns = header
         return get_detailed_search_info_html(metadata) + '<br><br>' + df.to_html(index=False)
+    if search_object.status == 'FAILURE':
+        return '{"status" : "FAILURE"}'
 
 
     res = AsyncResult(task_id, app=cel)
     print(res.info)
-    if str(res.state) == 'SUCCESS':
+    search_object.status = str(res.state)
+
+    if search_object.status == 'RUNNING':
+        db.session.commit()
+        return '{"status" : "RUNNING", "progress" : ' + str(res.info['done']) + ', "data_points": ' + str(res.info['total']) + '}'
+
+    if search_object.status == 'FAILURE':
+        search_object.search_completed = datetime.datetime.now(datetime.timezone.utc)
+        res.forget()
+        db.session.commit()
+        return '{"status" : "FAILURE"}'
+
+    if search_object.status == 'SUCCESS':
         output_table, header, metadata = res.get()
         search_object.items_searched = metadata
 
-        search_object.status = str(res.state)
         search_object.search_completed = datetime.datetime.now(datetime.timezone.utc)
         search_object.table_data = (output_table, header)
         db.session.commit()
 
         res.forget()
+        print('Forgot' + task_id)
         pd.set_option('display.max_colwidth', -1)
         df = pd.DataFrame(output_table)
         df.columns = header
         return get_detailed_search_info_html(metadata) + '<br><br>' + df.to_html(index=False)
     else:
-        search_object.status = str(res.state)
         db.session.commit()
         return '{"status" : "' + str(res.state) + '"}'
 
@@ -390,18 +407,26 @@ def show_past_search(task_id):
     #if user_object.user_name != search_object.user_name:
     #    return 'Forbidden'
 
+    if search_object.status == 'FAILURE':
+        return 'Failed Search'
+
+
     if search_object.status != 'SUCCESS':
         res = AsyncResult(task_id, app=cel)
         search_object.status = str(res.state)
-        if str(res.state) == 'SUCCESS':
+        if search_object.status == 'SUCCESS':
             output_table, header, metadata = res.get()
             search_object.items_searched = metadata
             search_object.search_completed = datetime.datetime.now(datetime.timezone.utc)
             search_object.table_data = (output_table, header)
             db.session.commit()
             res.forget()
+        elif search_object.status == 'FAILURE':
+            search_object.search_completed = datetime.datetime.now(datetime.timezone.utc)
+            db.session.commit()
+            res.forget()
         else:
-            return 'File Unready'
+            return '{"status" : "RUNNING", "progress" : ' + str(res.info['done']) + ', "data_points": ' + str(res.info['total']) + '}'
     table, header = search_object.table_data
 
     response_file = open('HTML_pages/load_search_template.html')
