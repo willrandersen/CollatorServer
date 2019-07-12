@@ -359,12 +359,12 @@ def check_status(task_id):
 
 
     res = AsyncResult(task_id, app=cel)
-    print(res.info)
+    #print(res.info)
     search_object.status = str(res.state)
-
+    info = res.info
     if search_object.status == 'RUNNING':
         db.session.commit()
-        return '{"status" : "RUNNING", "progress" : ' + str(res.info['done']) + ', "data_points": ' + str(res.info['total']) + '}'
+        return '{"status" : "RUNNING", "progress" : ' + str(info['done']) + ', "data_points": ' + str(info['total']) + '}'
 
     if search_object.status == 'FAILURE':
         search_object.search_completed = datetime.datetime.now(datetime.timezone.utc)
@@ -414,6 +414,7 @@ def show_past_search(task_id):
     if search_object.status != 'SUCCESS':
         res = AsyncResult(task_id, app=cel)
         search_object.status = str(res.state)
+        info = res.info
         if search_object.status == 'SUCCESS':
             output_table, header, metadata = res.get()
             search_object.items_searched = metadata
@@ -426,7 +427,7 @@ def show_past_search(task_id):
             db.session.commit()
             res.forget()
         else:
-            return '{"status" : "RUNNING", "progress" : ' + str(res.info['done']) + ', "data_points": ' + str(res.info['total']) + '}'
+            return '{"status" : "RUNNING", "progress" : ' + str(info['done']) + ', "data_points": ' + str(info['total']) + '}'
     table, header = search_object.table_data
 
     response_file = open('HTML_pages/load_search_template.html')

@@ -112,8 +112,8 @@
             if (Http.readyState == 4 && Http.status == 202) {
                 search_status = 'Submitted!';
                 let task_id = Http.responseText;
-                setTimeout(periodic_poll, 3000, task_id);
-                document.getElementById('paragraph_out').innerHTML = 'Running Search .';
+                setTimeout(periodic_poll, 1000, task_id);
+                document.getElementById('paragraph_out').innerHTML = search_status;
                 setTimeout(change_dots, 500);
             } else if (Http.readyState == 4) {
                 let add_row_button = document.getElementById("add_point_button");
