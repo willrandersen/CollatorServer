@@ -6,6 +6,7 @@ from threading import Thread
 from Networking_Utils import *
 from Additional_methods import GetProjectSCs, GetProjectName, GetConfirmationNums, GetCustomerNumber
 from Parsing_Errors import NoValidInputs,DatapointNotFound
+import psutil
 
 
 def merge_MOL_DS(DS_table, MOL_table, MOL_header):
@@ -225,6 +226,7 @@ def do_table_parsing(self, request_dict, session, sort_method):
     search_meta_data = {}
     count = 0
     length_of_dict = len(request_dict)
+    print(psutil.virtual_memory())
     for each_input in request_dict.keys():
         each_data_point_meta_data = []
         self.update_state(state='RUNNING', meta={'done': count, 'total': length_of_dict})
@@ -313,4 +315,7 @@ def do_table_parsing(self, request_dict, session, sort_method):
     for each_row_value in range(len(rows_to_print)):
         for each_col_value in range(len(MOL_header)):
             output_table[each_row_value][each_col_value] = rows_to_print[each_row_value][MOL_header[each_col_value]]
+    print(psutil.virtual_memory())
+    del rows_to_print
+    print(psutil.virtual_memory())
     return output_table, MOL_header, search_meta_data

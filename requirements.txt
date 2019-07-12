@@ -23,6 +23,7 @@ MarkupSafe==1.1.1
 numpy==1.16.4
 openpyxl==2.5.14
 pandas==0.24.2
+psutil==5.6.3
 psycopg2==2.8.3
 pyexcel==0.5.14
 pyexcel-io==0.5.18
