@@ -170,10 +170,17 @@ def get_detailed_search_info_html(dict):
     return string_builder
 
 
-def get_bolded_dict_string(dict):
+def get_bolded_dict_string(dict, status):
     string_builder = ''
     for each_entry in dict.keys():
-        if type(dict[each_entry]) == type([]) and 'No_Data_Found' == dict[each_entry][0]:
+        if status == 'FAILURE':
+            if dict[each_entry]:
+                string_builder += "<i><b>" + each_entry + "</b></i>"
+            else:
+                string_builder += "<i>" + each_entry + "</i>"
+        elif type(dict[each_entry]) == type([]) and 'No_Data_Found_Proj' == dict[each_entry][0]:
+            string_builder += "<i><b>" + each_entry + "</b></i>"
+        elif type(dict[each_entry]) == type([]) and 'No_Data_Found' == dict[each_entry][0]:
             string_builder += "<i>" + each_entry + "</i>"
         elif (type(dict[each_entry]) == type([]) and 'single' not in dict[each_entry][0]) or (dict[each_entry] and type(dict[each_entry]) != type([])):
             string_builder += "<b>" + each_entry + "</b>"
@@ -194,7 +201,7 @@ def build_recent_table(username):
         table_html += "<td>" + (each_search.search_started - time_delt).strftime("%b %d %Y %H:%M:%S") + " CDT </td>"
         table_html += "<td>" + each_search.task_id + "</td>"
         table_html += "<td>" + each_search.status + "</td>"
-        table_html += "<td>" + get_bolded_dict_string(each_search.items_searched) + "</td>"
+        table_html += "<td>" + get_bolded_dict_string(each_search.items_searched, each_search.status) + "</td>"
         #table_html += "<td>" + "" + "</td>"
         #table_html += "<td>" + "Link" + "</td>"
         if str(each_search.status) == 'SUCCESS':

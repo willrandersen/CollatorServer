@@ -232,6 +232,7 @@ def do_table_parsing(self, request_dict, session, sort_method):
         try:
             if isProjectOrder(each_input):
                 item_data = each_input.split(':')
+                each_data_point_meta_data.append('proj_search')
 
                 cust_num = item_data[0].strip()
                 proj_name = item_data[1].strip()
@@ -239,7 +240,6 @@ def do_table_parsing(self, request_dict, session, sort_method):
                 possible_other_SCs = GetConfirmationNums(cust_num, session)
                 project_SCs = GetProjectSCs(proj_name, possible_other_SCs, session)
 
-                each_data_point_meta_data.append('proj_search')
                 each_data_point_meta_data.extend(project_SCs)
                 search_meta_data[each_input] = each_data_point_meta_data
                 for each_proj_SC in project_SCs:
@@ -284,7 +284,10 @@ def do_table_parsing(self, request_dict, session, sort_method):
                     rows_to_print.extend(MOL_table)
             search_meta_data[each_input] = each_data_point_meta_data
         except (DatapointNotFound,IndexError):
-            each_data_point_meta_data[0] = "No_Data_Found"
+            if isProjectOrder(each_input) or request_dict[each_input]:
+                each_data_point_meta_data[0] = "No_Data_Found_Proj"
+            else:
+                each_data_point_meta_data[0] = "No_Data_Found"
             search_meta_data[each_input] = each_data_point_meta_data
 
     if MOL_header is None:
