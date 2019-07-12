@@ -55,15 +55,20 @@ def add_shipping_data(data_table, header, SC, session):
     results = [''] * len(data_table)
     list_count = 0
     for each_table_row in data_table:
-        if 'Tracking Information' in each_table_row.keys() and each_table_row['Tracking Information'] != '':
-            each_table_row['Serial Codes'] = '(No serial numbers available)'
+        try:
+            if 'Tracking Information' in each_table_row.keys() and each_table_row['Tracking Information'] != '':
+                each_table_row['Serial Codes'] = '(No serial numbers available)'
+                list_count += 1
+                continue
+            line_item = each_table_row['Line Item']
+            process = Thread(target=shipping_thread, args=[session, SC, line_item, results, list_count])
+            process.start()
+            threads.append(process)
             list_count += 1
-            continue
-        line_item = each_table_row['Line Item']
-        process = Thread(target=shipping_thread, args=[session, SC, line_item, results, list_count])
-        process.start()
-        threads.append(process)
-        list_count += 1
+        except RuntimeError as e:
+            print('Threading Error: shipping data')
+            print(len(threads))
+            raise e
     for each_p in threads:
         each_p.join()
     for row_index in range(len(results)):
