@@ -9,38 +9,37 @@
             text-indent: 40px;
             margin: 2px;
         }
-        /*.search_area{
-            text-indent: 30px;
-        }*/
     </style>
 </head>
 <script type="text/javascript">
     let added_count = 0;
     let running_search = false;
-
+    let search_status = '';
     let dot_count = 1;
 
     function change_dots() {
         if (running_search) {
             setTimeout(change_dots, 500);
             if (dot_count == 0) {
-                document.getElementById('paragraph_out').innerHTML = 'Running Search .';
+                document.getElementById('paragraph_out').innerHTML = search_status + ' .';
                 dot_count++;
             } else if (dot_count == 1) {
-                document.getElementById('paragraph_out').innerHTML = 'Running Search ..';
+                document.getElementById('paragraph_out').innerHTML = search_status + ' ..';
                 dot_count++;
             } else if (dot_count == 2) {
-                document.getElementById('paragraph_out').innerHTML = 'Running Search ...';
+                document.getElementById('paragraph_out').innerHTML = search_status + ' ...';
                 dot_count++;
             } else if (dot_count == 3) {
-                document.getElementById('paragraph_out').innerHTML = 'Running Search ....';
+                document.getElementById('paragraph_out').innerHTML = search_status + ' ....';
                 dot_count++;
             } else if (dot_count == 4) {
-                document.getElementById('paragraph_out').innerHTML = 'Running Search ';
+                document.getElementById('paragraph_out').innerHTML = search_status;
                 dot_count = 0;
             }
         } else {
-            document.getElementById('paragraph_out').innerHTML = '';
+            if (!search_status.startsWith('Search Failed!')) {
+                document.getElementById('paragraph_out').innerHTML = '';
+            }
         }
     }
 
@@ -54,7 +53,21 @@
             if (Http.readyState == 4) {
                 let response = Http.responseText;
                 if (response.startsWith('{"status" :')) {
-                    setTimeout(periodic_poll, 5000, task_ID);
+                    let json_response = JSON.parse(Http.responseText);
+                    if (json_response.status == 'FAILURE') {
+                        document.getElementById('paragraph_out').innerHTML = 'Search Failed!';
+                        running_search = false;
+                        let add_row_button = document.getElementById("add_point_button");
+                        add_row_button.disabled = false;
+                    }
+                    if (json_response.status == 'RUNNING') {
+                        search_status = 'Running - ' + json_response.progress + ' / ' + json_response.data_points + ' ';
+                        setTimeout(periodic_poll, 5000, task_ID);
+                    }
+                    if (json_response.status == 'PENDING') {
+                        search_status = 'Project Queued ';
+                        setTimeout(periodic_poll, 5000, task_ID);
+                    }
                 } else {
                     document.getElementById('paragraph_out').innerHTML = '';
                     console.log(response);
@@ -97,6 +110,7 @@
         Http.send(form);
         Http.onreadystatechange = function () {
             if (Http.readyState == 4 && Http.status == 202) {
+                search_status = 'Submitted!';
                 let task_id = Http.responseText;
                 setTimeout(periodic_poll, 3000, task_id);
                 document.getElementById('paragraph_out').innerHTML = 'Running Search .';
@@ -178,7 +192,9 @@ Sort by: <select id="sort_selector">
 <br> <br>
 <div class="search_area" id="button_area"></div>
 <br>
-<button class="search_area" onclick='add_row()' type="button" id="add_point_button" name="button">Add Additional Data Point</button>
+<button class="search_area" onclick='add_row()' type="button" id="add_point_button" name="button">Add Additional Data
+    Point
+</button>
 <br> <br>
 <button class="search_area" onclick='submit_search()' type="button" name="submit">Start Collator</button>
 <br>
