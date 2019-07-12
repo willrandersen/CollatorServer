@@ -43,6 +43,9 @@
         }
     }
 
+    function redirect_home() {
+        window.location = '/'
+    }
 
     function periodic_poll(task_ID) {
         const Http = new XMLHttpRequest();
@@ -54,6 +57,12 @@
                 let response = Http.responseText;
                 if (response.startsWith('{"status" :')) {
                     let json_response = JSON.parse(Http.responseText);
+                    if (json_response.status == 'LOGGED_OUT') {
+                        running_search = false;
+                        document.getElementById('paragraph_out').innerHTML = 'Your login has expired, please log in again';
+                        setTimeout(redirect_home, 1000);
+
+                    }
                     if (json_response.status == 'FAILURE') {
                         document.getElementById('paragraph_out').innerHTML = 'Search Failed!';
                         running_search = false;

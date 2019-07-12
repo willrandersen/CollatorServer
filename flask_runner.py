@@ -333,7 +333,7 @@ def run_search():
 @app.route('/status_check/<task_id>')
 def check_status(task_id):
     if not isLoggedIn(request):
-        return 'Unavailable', 401  # change to 401
+        return '{"status" : "LOGGED_OUT"}', 401  # change to 401
 
     requested_with_cookie = request.cookies.get('logged_in_cookie')
     user_object = User.query.filter_by(cookie=requested_with_cookie).first()
