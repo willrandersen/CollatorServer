@@ -37,8 +37,8 @@
                 dot_count = 0;
             }
         } else {
-            if (!search_status.startsWith('Search Failed!') && !search_status.startsWith('Your login has expired')) {
-                document.getElementById('paragraph_out').innerHTML = 'Search Completed';
+            if (!search_status=='LOGGED_OUT' && !search_status == 'Your login has expired') {
+                document.getElementById('paragraph_out').innerHTML = '';
             }
         }
     }
@@ -58,12 +58,14 @@
                 if (response.startsWith('{"status" :')) {
                     let json_response = JSON.parse(Http.responseText);
                     if (json_response.status == 'LOGGED_OUT') {
+                        search_status = 'LOGGED_OUT';
                         running_search = false;
                         document.getElementById('paragraph_out').innerHTML = 'Your login has expired, please log in again';
                         setTimeout(redirect_home, 1000);
 
                     }
                     if (json_response.status == 'FAILURE') {
+                        search_status = 'FAILED';
                         document.getElementById('paragraph_out').innerHTML = 'Search Failed!';
                         running_search = false;
                         let add_row_button = document.getElementById("add_point_button");
