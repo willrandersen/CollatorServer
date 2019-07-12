@@ -37,8 +37,8 @@
                 dot_count = 0;
             }
         } else {
-            if (!search_status.startsWith('Search Failed!')) {
-                document.getElementById('paragraph_out').innerHTML = '';
+            if (!search_status.startsWith('Search Failed!') && !search_status.startsWith('Your login has expired')) {
+                document.getElementById('paragraph_out').innerHTML = 'Search Completed';
             }
         }
     }
