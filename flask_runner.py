@@ -195,15 +195,15 @@ def get_bolded_dict_string(dict, status):
 
 
 def build_recent_table(username):
-    start_recent_table = time.time()
+    #start_recent_table = time.time()
     recent_searches = Search.query.filter_by(user_name=username).order_by(Search.search_started).all()
-    print('table build time: ' + str(time.time() - start_recent_table))
+    #print('table build time: ' + str(time.time() - start_recent_table))
     after_database = time.time()
     if len(recent_searches) == 0:
         return '<tr>No Recent Searches</tr>'
     table_html = '<tr>'
     time_delt = datetime.timedelta(hours=5)
-    print('table build time: ' + str(time.time() - after_database))
+    #print('table build time: ' + str(time.time() - after_database))
     for each_search in recent_searches[::-1]:
         table_html += "\n<tr>"
         table_html += "<td>" + (each_search.search_started - time_delt).strftime("%b %d %Y %H:%M:%S") + " CDT </td>"
@@ -217,14 +217,14 @@ def build_recent_table(username):
         else:
             table_html += "<td>" + "Unavailable" + "</td>"
         table_html += "</tr>"
-    print('table build time: ' + str(time.time() - after_database))
+    #print('table build time: ' + str(time.time() - after_database))
     return table_html + "\n"
 
 
 def update_unresolved_searches(username):
-    start_recent_table = time.time()
+    #start_recent_table = time.time()
     recent_searches = Search.query.filter_by(user_name=username).all()
-    print('table update time: ' + str(time.time() - start_recent_table))
+    #print('table update time: ' + str(time.time() - start_recent_table))
     for each_search in recent_searches:
         task_id = each_search.task_id
         time_since_search = datetime.datetime.now() - each_search.search_started
@@ -244,9 +244,9 @@ def update_unresolved_searches(username):
             if each_search.status == 'FAILURE':
                 each_search.search_completed = datetime.datetime.now(datetime.timezone.utc)
                 res.forget()
-    start_recent_table = time.time()
+    #start_recent_table = time.time()
     db.session.commit()
-    print('table commit time: ' + str(time.time() - start_recent_table))
+    #print('table commit time: ' + str(time.time() - start_recent_table))
 
 
 
@@ -285,21 +285,21 @@ def get_all_search_data():
 
 @app.route('/Main')
 def get_main_page():
-    start_time = time.time()
+    #start_time = time.time()
     if not isLoggedIn(request):
         response_file = open('HTML_pages/Redirect_Home.html')
         return response_file.read()
     response_file = open('HTML_pages/Main_Page.html')
     template = response_file.read()
-    print(time.time() - start_time)
+    #print(time.time() - start_time)
     #response_file.close()
     requested_with_cookie = request.cookies.get('logged_in_cookie')
     user_searched = User.query.filter_by(cookie=requested_with_cookie).first()
-    print(time.time() - start_time)
+    #print(time.time() - start_time)
     update_unresolved_searches(user_searched.user_name)
-    print(time.time() - start_time)
+    #print(time.time() - start_time)
     template = template.format(user_searched.name, build_recent_table(user_searched.user_name))
-    print(time.time() - start_time)
+    #print(time.time() - start_time)
     return template
 
 @app.route('/Run-Search')
