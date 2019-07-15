@@ -7,24 +7,18 @@
 </head>
 <body>
 <script type="text/javascript">
-    function send_logout() {
-        {
+    function send_logout() {{
             const Http = new XMLHttpRequest();
             let url = "/logout";
             Http.open("DELETE", url);
             Http.send();
-            Http.onreadystatechange = function () {
-                {
-                    if (Http.readyState == 4) {
-                        {
+            Http.onreadystatechange = function () {{
+                    if (Http.readyState == 4) {{
                             window.location = '/';
                             document.cookie = 'logged_in_cookie=;path=/;';
-                        }
-                    }
-                }
-            }
-        }
-    }
+                        }}
+                }}
+        }}
 </script>
 <h2>Welcome {}</h2>
 <p>Click below to create a search!</p>
@@ -47,9 +41,9 @@
 <p>Searches are deleted after 1 week!</p>
 <button onclick="send_logout()">Log Out</button>
 <script type="text/javascript">
-    function refresh_page() {
+    function refresh_page() {{
         location = location
-    }
+    }}
     setTimeout(refresh_page, 10000);
 </script>
 </body>
