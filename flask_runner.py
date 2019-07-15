@@ -222,7 +222,9 @@ def build_recent_table(username):
 
 
 def update_unresolved_searches(username):
+    start_recent_table = time.time()
     recent_searches = Search.query.filter_by(user_name=username).all()
+    print('table update time: ' + str(time.time() - start_recent_table))
     for each_search in recent_searches:
         task_id = each_search.task_id
         time_since_search = datetime.datetime.now() - each_search.search_started
@@ -242,8 +244,10 @@ def update_unresolved_searches(username):
             if each_search.status == 'FAILURE':
                 each_search.search_completed = datetime.datetime.now(datetime.timezone.utc)
                 res.forget()
-
+    start_recent_table = time.time()
     db.session.commit()
+    print('table commit time: ' + str(time.time() - start_recent_table))
+
 
 
 @app.route('/logout', methods=['DELETE'])
