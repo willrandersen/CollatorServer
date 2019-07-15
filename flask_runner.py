@@ -12,6 +12,8 @@ from Parsing_Task import cel, do_table_parsing
 from celery.result import AsyncResult
 import pandas as pd
 import flask_excel as excel
+import time
+
 
 MAX_TABLE_SIZE = 15
 
@@ -274,18 +276,21 @@ def get_all_search_data():
 
 @app.route('/Main')
 def get_main_page():
+    start_time = time.time()
     if not isLoggedIn(request):
         response_file = open('HTML_pages/Redirect_Home.html')
         return response_file.read()
     response_file = open('HTML_pages/Main_Page.html')
     template = response_file.read()
-    response_file.close()
+    print(time.time() - start_time)
+    #response_file.close()
     requested_with_cookie = request.cookies.get('logged_in_cookie')
     user_searched = User.query.filter_by(cookie=requested_with_cookie).first()
-
+    print(time.time() - start_time)
     update_unresolved_searches(user_searched.user_name)
-
+    print(time.time() - start_time)
     template = template.format(user_searched.name, build_recent_table(user_searched.user_name))
+    print(time.time() - start_time)
     return template
 
 @app.route('/Run-Search')
