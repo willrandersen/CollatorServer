@@ -195,11 +195,13 @@ def get_bolded_dict_string(dict, status):
 
 
 def build_recent_table(username):
+    start_recent_table = time.time()
     recent_searches = Search.query.filter_by(user_name=username).order_by(Search.search_started).all()
     if len(recent_searches) == 0:
         return '<tr>No Recent Searches</tr>'
     table_html = '<tr>'
     time_delt = datetime.timedelta(hours=5)
+    print('table build time: ' + str(time.time() - start_recent_table))
     for each_search in recent_searches[::-1]:
         table_html += "\n<tr>"
         table_html += "<td>" + (each_search.search_started - time_delt).strftime("%b %d %Y %H:%M:%S") + " CDT </td>"
@@ -213,6 +215,7 @@ def build_recent_table(username):
         else:
             table_html += "<td>" + "Unavailable" + "</td>"
         table_html += "</tr>"
+    print('table build time: ' + str(time.time() - start_recent_table))
     return table_html + "\n"
 
 
