@@ -81,6 +81,13 @@ class Login_Error(Enum):
     TIME_OUT = -2
     NETWORKING_FAILURE = -3
 
+
+def test_old_project(task_id):
+    search_object = Search.query.filter_by(task_id=task_id).first()
+    date = datetime.datetime.now() - datetime.timedelta(days=8)
+    search_object.search_started = date
+    db.session.commit()
+
 def MOL_Login(session, user, password):
     payload = {'Username': user, 'Password': password, 'Connection': 'NA',
                'USER': user, 'SMAUTHREASON': '0', 'btnLogin': 'Login', 'FullURL': '',
