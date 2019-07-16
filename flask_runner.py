@@ -381,7 +381,7 @@ def check_status(task_id):
         pd.set_option('display.max_colwidth', -1)
         df = pd.DataFrame(output_table)
         df.columns = header
-        return get_detailed_search_info_html(metadata) + '<br><br>' + df.to_html(index=False)
+        return get_detailed_search_info_html(metadata) + '<br><br>' + df.to_html(index=False, justify='center')
     if search_object.status == 'FAILURE':
         return '{"status" : "FAILURE"}'
 
@@ -413,7 +413,7 @@ def check_status(task_id):
         pd.set_option('display.max_colwidth', -1)
         df = pd.DataFrame(output_table)
         df.columns = header
-        return get_detailed_search_info_html(metadata) + '<br><br>' + df.to_html(index=False)
+        return get_detailed_search_info_html(metadata) + '<br><br>' + df.to_html(index=False, justify='center')
     else:
         db.session.commit()
         return '{"status" : "' + str(res.state) + '"}'
@@ -464,7 +464,7 @@ def show_past_search(task_id):
     pd.set_option('display.max_colwidth', -1)
     df = pd.DataFrame(table)
     df.columns = header
-    table_html_string = df.to_html(index=False)
+    table_html_string = df.to_html(index=False, justify='center')
 
     time_delt = datetime.timedelta(hours=5)
 
