@@ -256,10 +256,10 @@ def update_unresolved_searches(username):
 @app.route('/about', methods=['GET'])
 def send_about():
     if isLoggedIn(request):
-        response_file = open('HTML_pages/Redirect_Main.html')
+        response_file = open('HTML_pages/Instructions_page.html')
         return response_file.read()
     else:
-        response_file = open('HTML_pages/Instructions_page_logged_out.html')
+        response_file = open('HTML_pages/Redirect_Main.html')
     return response_file.read()
 
 @app.route('/logout', methods=['DELETE'])
