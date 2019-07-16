@@ -253,9 +253,14 @@ def update_unresolved_searches(username):
     #print('table commit time: ' + str(time.time() - start_recent_table))
 
 
-@app.route('/about.html', methods=['GET'])
+@app.route('/about', methods=['GET'])
 def send_about():
-    return flask.send_from_directory(directory='HTML_pages', filename='Instructions_page.html')
+    if isLoggedIn(request):
+        response_file = open('HTML_pages/Instructions_page.html')
+        return response_file.read()
+    else:
+        response_file = open('HTML_pages/Instructions_page_logged_out.html')
+    return response_file.read()
 
 @app.route('/logout', methods=['DELETE'])
 def logout_data():

@@ -9,10 +9,12 @@
             text-indent: 40px;
             margin: 2px;
         }
-        thead{
+
+        thead {
             text-align: center;
             background-color: #bfd6ff;
         }
+
         tr:nth-child(even) {
             background-color: #d4d4d4;
         }
@@ -45,7 +47,7 @@
                 dot_count = 0;
             }
         } else {
-            if (!search_status=='LOGGED_OUT' && !search_status == 'Your login has expired') {
+            if (!search_status == 'LOGGED_OUT' && !search_status == 'Your login has expired') {
                 document.getElementById('paragraph_out').innerHTML = '';
             }
         }
@@ -196,12 +198,16 @@
 </script>
 
 <h2>Enter an FO/SC/Project</h2> <br>
-<p>Instructions: Each box takes a Project Input*, an FO, or a List ID. <br> If you would like to also load all other data
+<p>Instructions: Each box takes a Project Input*, an FO, or a List ID. <br> If you would like to also load all other
+    data
     on a project, mark the check beside the data point (This can take a few minutes). <br> Note that this is
     automatically checked on "Project Name" searches.<br> <b>*</b> The proper format for a project input is the
     customer number, followed by a colon, followed by the project name("1036808460:NYS16I101A", "1036311819:NE-14I103A",
     or "1035663683:Il-16I147A") <br> <br>When completed results will be displayed below. They'll also be available on
     the home screen.</p><br>
+
+<button onclick="window.location.href = '/About';">About</button>
+
 Sort by: <select id="sort_selector">
     <option value="0">FO and Line Item</option>
     <option value="1">Unshipped Items</option>
