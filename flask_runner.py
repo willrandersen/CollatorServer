@@ -252,6 +252,9 @@ def update_unresolved_searches(username):
     db.session.commit()
     #print('table commit time: ' + str(time.time() - start_recent_table))
 
+@app.route('/favicon.ico')
+def send_logo():
+    return flask.send_from_directory('icon','favicon.ico',mimetype='image/vnd.microsoft.icon')
 
 @app.route('/about', methods=['GET'])
 def send_about():
@@ -261,6 +264,7 @@ def send_about():
     else:
         response_file = open('HTML_pages/Redirect_Main.html')
     return response_file.read()
+
 
 @app.route('/logout', methods=['DELETE'])
 def logout_data():
