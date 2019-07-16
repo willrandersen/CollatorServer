@@ -25,6 +25,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 heroku = Heroku(app)
 db = SQLAlchemy(app)
 
+
 class User(db.Model):
     __tablename__ = "user_pickled_cookie_data"
     id = db.Column(db.Integer, primary_key=True)
@@ -46,6 +47,7 @@ class User(db.Model):
 
     def serialize(self):
         return {'id' : self.id, 'user_name' : self.user_name, 'cookie' : self.cookie, 'session' : "Session_object", 'name' : self.name, 'login' : self.last_login}
+
 
 class Search(db.Model):
     __tablename__ = "recent_searches"
@@ -227,11 +229,11 @@ def update_unresolved_searches(username):
     #print('table update time: ' + str(time.time() - start_recent_table))
     for each_search in recent_searches:
         task_id = each_search.task_id
-        time_since_search = datetime.datetime.now() - each_search.search_started
-        duration_seconds = time_since_search.total_seconds()
-        if duration_seconds > 60 * 60 * 24 * 7:
-            Search.query.filter_by(task_id=task_id).delete()
-            continue
+        #time_since_search = datetime.datetime.now() - each_search.search_started
+        #duration_seconds = time_since_search.total_seconds()
+        # if duration_seconds > 60 * 60 * 24 * 7:
+        #     Search.query.filter_by(task_id=task_id).delete()
+        #     continue
         if each_search.status != 'SUCCESS' and each_search.status != 'FAILURE':
             res = AsyncResult(task_id, app=cel)
             each_search.status = str(res.state)
@@ -259,6 +261,7 @@ def logout_data():
     db.session.commit()
     return 'Logged Out', 200
 
+
 @app.route('/')
 def get_initial_page():
     if isLoggedIn(request):
@@ -272,6 +275,7 @@ def get_initial_page():
 #     if isLoggedIn(request):
 #         return flask.send_from_directory(directory='HTML_pages', filename='Redirect_Main.html', cache_timeout=1)
 #     return flask.send_from_directory(directory='HTML_pages', filename='Login_Main.html', cache_timeout=1)
+
 
 @app.route('/check_database')
 def get_all_data():
@@ -465,6 +469,7 @@ def show_past_search(task_id):
 
     response_html = template.format(task_id, search_object.user_name, (search_object.search_started - time_delt).strftime("%b %d %Y %H:%M:%S") + " CDT", get_detailed_search_info_html(search_object.items_searched),task_id,table_html_string)
     return response_html
+
 
 @app.route('/download/<task_id>')
 def send_loaded_file(task_id):

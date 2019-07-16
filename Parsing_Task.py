@@ -262,8 +262,11 @@ def do_table_parsing(self, request_dict, session, sort_method):
                 FO = each_input
                 FO_Info = MOL_Search_FO(session, each_input)
                 SC = FO_Info['Confirmation Number']
-                MOL_header, MOL_table = MOL_Order_Status(session, SC, FO)
 
+                if request_dict[each_input]:
+                    MOL_header, MOL_table = MOL_Order_Status(session, SC)
+                else:
+                    MOL_header, MOL_table = MOL_Order_Status(session, SC, FO)
                 each_data_point_meta_data.append(SC)
             else:
                 each_data_point_meta_data.append("single_listid_search")
