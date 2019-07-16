@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Collator Instructions</title>
+    <style type="text/css">
+        h4{
+            margin: 0;
+        }
+        ol,ul{
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+<h1>About</h1>
+
+<p>The MOL Data Collator is a tool designed to pull all the information on a data point into an easy to use
+    format.<br>It uses your MOL login to request all the necessary information, then parses it, and exports it to a
+    table.
+</p>
+
+<p>The collator accepts three types of data points: Factory Order numbers, List ID numbers, and Project Inputs.<br><br>Project
+    Inputs are the customer number of a project, followed by a colon, followed by the project name. <br>
+    Examples include "1036808460:NYS16I101A", "1036311819:NE-14I103A", or "1035663683:Il-16I147A".
+</p>
+
+<p>The collator is capable of running a 'Project Search' which fetches all the data associated with the same project and
+    customer number as the given FO/List ID.<br> Note that it is not necessary to enter two different data points and
+    run project searches on both.<br><br>Project Searches are automatically ran when a project input is searched.<br>Running
+    a Project Search on a List ID/FO is equivalent to running a project input search on the project containing the data
+    point.
+    <br><br>Data can then be exported to excel in the .xlsx format using the 'export' button above each search result table</p>
+
+<h4>Basic Use Instructions:</h4>
+<ol>
+    <li>Enter FOs/List IDs/Project Inputs into the data point box. Add data fields as necessary.</li>
+    <li>Check the box beside each data point to run a project search on it as necessary.</li>
+    <li>Select 'Run Collator'. Once the search is submitted, you are free to leave the search page.</li>
+    <li>Once the search is done the results will appear below the 'Start Collator'  button and be available in the home screen.</li>
+</ol>
+
+<h4>Additional Information:</h4>
+<ul>
+    <li>Each search should take between 10 and 15 seconds for every 100 equipment items on a search.</li>
+    <li>Orders from Risk may not be included in project searches, as they are listed under a different customer. <br> To remedy this, it is suggested to enter all risk data points in addition to the main project.</li>
+    <li>Project Searches on FO/List IDs from Risk will not be processed.</li>
+</ul>
+
+<button onclick="window.location.href = '/Run-Search';">Search Page</button>
+<button class="search_area" onclick="window.location = '/Main';">Back to Home</button>
+</body>
+</html>

@@ -4,6 +4,7 @@ from random import randint
 import lxml.html
 from bs4 import BeautifulSoup
 import json
+import flask
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_heroku import Heroku
@@ -252,6 +253,9 @@ def update_unresolved_searches(username):
     #print('table commit time: ' + str(time.time() - start_recent_table))
 
 
+@app.route('/about.html', methods=['GET'])
+def send_about():
+    return flask.send_from_directory(directory='HTML_pages', filename='Instructions_page.html')
 
 @app.route('/logout', methods=['DELETE'])
 def logout_data():
