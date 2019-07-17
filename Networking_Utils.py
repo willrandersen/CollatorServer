@@ -153,6 +153,8 @@ def MOL_Order_Status(session, SC, FO=''):
             html_element_list = each_row.find_all('td')
             for each_column in range(0, len(html_element_list)):
                 row_data[table_headers[each_column]] = format_string(html_element_list[each_column].get_text().strip())
+                if each_column == 12:
+                    print(html_element_list[each_column])
             table_rows.append(row_data)
         page += 1
 
