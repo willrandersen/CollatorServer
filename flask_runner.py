@@ -154,6 +154,8 @@ def remove_outdated(username):
 def get_detailed_search_info_html(dict):
     string_builder = '<h3>Search Meta Data:</h3>'
     for each_entry in dict.keys():
+        if dict[each_entry][0] == 'fo_risk_proj_search':
+            string_builder += 'Cannot run project search on Risk FO ' + each_entry
         if dict[each_entry][0] == 'No_Data_Found_Proj':
             string_builder += 'No project data found for ' + each_entry
         if dict[each_entry][0] == 'No_Data_Found':

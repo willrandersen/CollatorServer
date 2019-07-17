@@ -264,6 +264,9 @@ def do_table_parsing(self, request_dict, session, sort_method):
                 SC = FO_Info['Confirmation Number']
 
                 if request_dict[each_input]:
+                    if FO.startswith('4808'):
+                        request_dict[each_input] = False
+                        each_data_point_meta_data[0] = "fo_risk_proj_search"
                     MOL_header, MOL_table = MOL_Order_Status(session, SC)
                 else:
                     MOL_header, MOL_table = MOL_Order_Status(session, SC, FO)
