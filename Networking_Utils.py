@@ -144,6 +144,7 @@ def MOL_Order_Status(session, SC, FO=''):
             order_entry_date = format_string(header_table_html.find_all('td')[2].get_text())
             for x in main_table_html.find_all('th'):
                 table_headers.append(x.get_text().strip())
+            table_headers.append('Has Serial Codes')
 
         if len(main_table_html.find_all('tr', bgcolor='#FFFFFF')) == 0:
             break
@@ -154,6 +155,7 @@ def MOL_Order_Status(session, SC, FO=''):
             for each_column in range(0, len(html_element_list)):
                 row_data[table_headers[each_column]] = format_string(html_element_list[each_column].get_text().strip())
                 if each_column == 12:
+                    row_data['Has Serial Codes'] = len(html_element_list[each_column].find_all('a')) == 1
                     print(len(html_element_list[each_column].find_all('a')) == 1)
             table_rows.append(row_data)
         page += 1
