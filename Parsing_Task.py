@@ -261,7 +261,7 @@ def do_table_parsing(self, request_dict, session, sort_method):
 
                 each_data_point_meta_data.extend(project_SCs)
                 search_meta_data[each_input] = each_data_point_meta_data
-                print(time.time() - start_time)
+                #print(time.time() - start_time)
                 # for each_proj_SC in project_SCs:
                 #     MOL_header, MOL_table = MOL_Order_Status(session, each_proj_SC)
                 #     add_shipping_data(MOL_table, MOL_header, each_proj_SC, session)
