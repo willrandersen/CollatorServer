@@ -56,6 +56,11 @@ def add_shipping_data(data_table, header, SC, session):
     list_count = 0
     for each_table_row in data_table:
         try:
+            if not each_table_row['Has Serial Codes']:
+                each_table_row['Serial Codes'] = '(No serial numbers available)'
+                each_table_row['Tracking Information'] = "Didn't load"
+                list_count += 1
+                continue
             if 'Tracking Information' in each_table_row.keys() and each_table_row['Tracking Information'] != '':
                 each_table_row['Serial Codes'] = '(No serial numbers available)'
                 list_count += 1
