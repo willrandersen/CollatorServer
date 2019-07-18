@@ -8,7 +8,7 @@ from Additional_methods import GetProjectSCs, GetProjectName, GetConfirmationNum
 from Parsing_Errors import NoValidInputs,DatapointNotFound
 import psutil
 import time
-
+import gc
 
 def merge_MOL_DS(DS_table, MOL_table, MOL_header):
     MOL_header.append('Internal Comments (DS Items)')
@@ -236,6 +236,7 @@ def multithreaded_project_order_status(session, sc, list, index):
 
 @cel.task(bind = True)
 def do_table_parsing(self, request_dict, session, sort_method):
+    gc.collect()
     self.update_state(state='RUNNING')
     rows_to_print = []
     MOL_header = None
