@@ -7,6 +7,7 @@ from Networking_Utils import *
 from Additional_methods import GetProjectSCs, GetProjectName, GetConfirmationNums, GetCustomerNumber
 from Parsing_Errors import NoValidInputs,DatapointNotFound
 import psutil
+import time
 
 
 def merge_MOL_DS(DS_table, MOL_table, MOL_header):
@@ -238,11 +239,11 @@ def do_table_parsing(self, request_dict, session, sort_method):
     self.update_state(state='RUNNING')
     rows_to_print = []
     MOL_header = None
-
+    start_time = time.time()
     search_meta_data = {}
     count = 0
     length_of_dict = len(request_dict)
-    print(psutil.virtual_memory())
+    #print(psutil.virtual_memory())
     for each_input in request_dict.keys():
         each_data_point_meta_data = []
         self.update_state(state='RUNNING', meta={'done': count, 'total': length_of_dict})
@@ -260,6 +261,7 @@ def do_table_parsing(self, request_dict, session, sort_method):
 
                 each_data_point_meta_data.extend(project_SCs)
                 search_meta_data[each_input] = each_data_point_meta_data
+                print(time.time() - start_time)
                 # for each_proj_SC in project_SCs:
                 #     MOL_header, MOL_table = MOL_Order_Status(session, each_proj_SC)
                 #     add_shipping_data(MOL_table, MOL_header, each_proj_SC, session)
@@ -274,12 +276,13 @@ def do_table_parsing(self, request_dict, session, sort_method):
                     index += 1
                 for each_thread in threads:
                     each_thread.join()
-
+                print(time.time() - start_time)
                 for head, table, SC in table_outputs:
                     MOL_header = head
                     MOL_table = table
                     add_shipping_data(MOL_table, MOL_header, SC, session)
                     rows_to_print.extend(MOL_table)
+                print(time.time() - start_time)
                 continue
             FO = ""
             SC = None
