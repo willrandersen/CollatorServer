@@ -58,7 +58,7 @@ def add_shipping_data(data_table, header, SC, session):
         try:
             if not each_table_row['Has Serial Codes']:
                 each_table_row['Serial Codes'] = '(No serial numbers available)'
-                each_table_row['Tracking Information'] = "Didn't load"
+                each_table_row['Tracking Information'] = "-"
                 list_count += 1
                 continue
             if 'Tracking Information' in each_table_row.keys() and each_table_row['Tracking Information'] != '':
@@ -227,6 +227,12 @@ cel.config_from_object('celery_settings')
 #             output_table[each_row_value][each_col_value] = rows_to_print[each_row_value][MOL_header[each_col_value]]
 #     return output_table, MOL_header
 
+def multithreaded_project_order_status(session, sc, list, index):
+    head, table = MOL_Order_Status(session, sc)
+    list[index] = head, table, sc
+
+
+
 @cel.task(bind = True)
 def do_table_parsing(self, request_dict, session, sort_method):
     self.update_state(state='RUNNING')
@@ -254,9 +260,25 @@ def do_table_parsing(self, request_dict, session, sort_method):
 
                 each_data_point_meta_data.extend(project_SCs)
                 search_meta_data[each_input] = each_data_point_meta_data
+                # for each_proj_SC in project_SCs:
+                #     MOL_header, MOL_table = MOL_Order_Status(session, each_proj_SC)
+                #     add_shipping_data(MOL_table, MOL_header, each_proj_SC, session)
+                #     rows_to_print.extend(MOL_table)
+                threads = []
+                index = 0
+                table_outputs = [''] * len(project_SCs)
                 for each_proj_SC in project_SCs:
-                    MOL_header, MOL_table = MOL_Order_Status(session, each_proj_SC)
-                    add_shipping_data(MOL_table, MOL_header, each_proj_SC, session)
+                    process = Thread(target=multithreaded_project_order_status, args=[session, each_proj_SC, table_outputs, index])
+                    process.start()
+                    threads.append(process)
+                    index += 1
+                for each_thread in threads:
+                    each_thread.join()
+
+                for head, table, SC in table_outputs:
+                    MOL_header = head
+                    MOL_table = table
+                    add_shipping_data(MOL_table, MOL_header, SC, session)
                     rows_to_print.extend(MOL_table)
                 continue
             FO = ""
@@ -301,7 +323,7 @@ def do_table_parsing(self, request_dict, session, sort_method):
                     add_shipping_data(MOL_table, MOL_header, each_proj_SC, session)
                     rows_to_print.extend(MOL_table)
             search_meta_data[each_input] = each_data_point_meta_data
-        except (DatapointNotFound,IndexError):
+        except (DatapointNotFound, IndexError):
             if isProjectOrder(each_input) or request_dict[each_input]:
                 each_data_point_meta_data[0] = "No_Data_Found_Proj"
             else:
