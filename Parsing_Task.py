@@ -11,6 +11,9 @@ import time
 import gc
 from Task_Queue import Task, full_run
 
+SHIPPING_THREAD_MAX = 64
+
+
 def merge_MOL_DS(DS_table, MOL_table, MOL_header):
     MOL_header.append('Internal Comments (DS Items)')
     MOL_header.append('Buyer Name')
@@ -75,7 +78,7 @@ def add_shipping_data(data_table, header, SC, session):
             print('Threading Error: shipping data')
             print(len(threads))
             raise e
-    full_run(threads, 32)
+    full_run(threads, SHIPPING_THREAD_MAX)
     for row_index in range(len(results)):
         if results[row_index] == '':
             continue
