@@ -11,7 +11,7 @@ import time
 import gc
 from Task_Queue import Task, full_run
 
-SHIPPING_THREAD_MAX = 24
+SHIPPING_THREAD_MAX = 16
 
 
 def merge_MOL_DS(DS_table, MOL_table, MOL_header):
