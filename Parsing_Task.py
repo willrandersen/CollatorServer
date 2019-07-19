@@ -9,6 +9,7 @@ from Parsing_Errors import NoValidInputs,DatapointNotFound
 import psutil
 import time
 import gc
+from Task_Queue import Task, full_run
 
 def merge_MOL_DS(DS_table, MOL_table, MOL_header):
     MOL_header.append('Internal Comments (DS Items)')
@@ -67,16 +68,14 @@ def add_shipping_data(data_table, header, SC, session):
                 list_count += 1
                 continue
             line_item = each_table_row['Line Item']
-            process = Thread(target=shipping_thread, args=[session, SC, line_item, results, list_count])
-            process.start()
+            process = Task(target=shipping_thread, args=[session, SC, line_item, results, list_count])
             threads.append(process)
             list_count += 1
         except RuntimeError as e:
             print('Threading Error: shipping data')
             print(len(threads))
             raise e
-    for each_p in threads:
-        each_p.join()
+    full_run(threads, 8)
     for row_index in range(len(results)):
         if results[row_index] == '':
             continue
