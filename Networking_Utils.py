@@ -138,8 +138,8 @@ def MOL_Order_Status(session, SC, FO=''):
         if page == 1:
 
             page_table_list = order_status_parser.find_all('table', class_='pagingControls')
-            if len(page_table_list) > 1:
-                print(page_table_list[0].get_text().strip())
+            if len(page_table_list) > 0:
+                print(SC + ' : ' + page_table_list[0].get_text().strip())
 
             header_customer_html = order_status_parser.find_all('table', width="90%", border="0")[1]
             ship_to_address = format_string(header_customer_html.find_all('td', rowspan="3", valign="top")[1].get_text())
