@@ -11,7 +11,7 @@ import time
 import gc
 from Task_Queue import Task, full_run
 
-SHIPPING_THREAD_MAX = 64
+SHIPPING_THREAD_MAX = 32
 
 
 def merge_MOL_DS(DS_table, MOL_table, MOL_header):
@@ -238,6 +238,7 @@ def multithreaded_project_order_status(session, sc, list, index):
 
 @cel.task(bind = True)
 def do_table_parsing(self, request_dict, session, sort_method):
+    print(SHIPPING_THREAD_MAX)
     gc.collect()
     self.update_state(state='RUNNING')
     rows_to_print = []
