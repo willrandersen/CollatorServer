@@ -19,7 +19,7 @@ def full_run(task_list, thread_num=256):
     while not task_queue.empty() or len(running_threads) > 0:
         while len(running_threads) < thread_num and not task_queue.empty():
             next_task = task_queue.get()
-            print('starting ' + str(next_task.args))
+            print('starting task')
             task_in_thread = Thread(target=next_task.target, args=next_task.args)
             running_threads.append(task_in_thread)
             task_in_thread.start()

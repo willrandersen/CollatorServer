@@ -75,7 +75,7 @@ def add_shipping_data(data_table, header, SC, session):
             print('Threading Error: shipping data')
             print(len(threads))
             raise e
-    full_run(threads, 8)
+    full_run(threads, 32)
     for row_index in range(len(results)):
         if results[row_index] == '':
             continue
