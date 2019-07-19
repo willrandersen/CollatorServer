@@ -156,7 +156,7 @@ def MOL_Order_Status(session, SC, FO=''):
                 row_data[table_headers[each_column]] = format_string(html_element_list[each_column].get_text().strip())
                 if each_column == 12:
                     row_data['Has Serial Codes'] = len(html_element_list[each_column].find_all('a')) == 1
-                    print(len(html_element_list[each_column].find_all('a')) == 1)
+                    #print(len(html_element_list[each_column].find_all('a')) == 1)
             table_rows.append(row_data)
         page += 1
 
