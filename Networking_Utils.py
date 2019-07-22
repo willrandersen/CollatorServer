@@ -140,7 +140,7 @@ def MOL_Order_Status(session, SC, FO=''):
             page_table_list = order_status_parser.find_all('table', class_='pagingControls')
             if len(page_table_list) > 0:
                 page_list_string = page_table_list[0].get_text().strip()
-                pages_in_report = int(page_list_string[10:])
+                pages_in_report = page_list_string[10:]
             print(SC + ' : ' + pages_in_report)
 
             header_customer_html = order_status_parser.find_all('table', width="90%", border="0")[1]
