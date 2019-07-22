@@ -136,12 +136,12 @@ def MOL_Order_Status(session, SC, FO=''):
         main_table_html = order_status_parser.find_all('table', id='tblDetails')[0]
 
         if page == 1:
-            pages_in_report = '1'
+            pages_in_report = 1
             page_table_list = order_status_parser.find_all('table', class_='pagingControls')
             if len(page_table_list) > 0:
                 page_list_string = page_table_list[0].get_text().strip()
-                pages_in_report = page_list_string[10:]
-            print(SC + ' : ' + pages_in_report)
+                pages_in_report = int(page_list_string[10:])
+            print(SC + ' : ' + str(pages_in_report))
 
             header_customer_html = order_status_parser.find_all('table', width="90%", border="0")[1]
             ship_to_address = format_string(header_customer_html.find_all('td', rowspan="3", valign="top")[1].get_text())
