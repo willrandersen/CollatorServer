@@ -136,7 +136,7 @@ def MOL_Order_Status(session, SC, FO=''):
         main_table_html = order_status_parser.find_all('table', id='tblDetails')[0]
 
         if page == 1:
-            pages_in_report = 1
+            pages_in_report = '1'
             page_table_list = order_status_parser.find_all('table', class_='pagingControls')
             if len(page_table_list) > 0:
                 page_list_string = page_table_list[0].get_text().strip()
