@@ -1,6 +1,8 @@
 from bs4 import BeautifulSoup
 from Task_Queue import *
 from Networking_Utils import format_string
+import time
+
 
 def first_page_thread(session, SC, list, index, FO=""):
     MOL_url_POST_Order_Status = 'https://businessonline.motorolasolutions.com/Member/OrderStatus/order_status_detail.asp'
@@ -49,6 +51,7 @@ def first_page_thread(session, SC, list, index, FO=""):
         table_rows.append(row_data)
     list[index] = (table_headers, table_rows, customer_name, ship_to_address, order_entry_date, pages_in_report)
 
+
 def later_page_thread(session, SC, header, page, list, index, FO=""):
     table_rows = []
     MOL_url_POST_Order_Status = 'https://businessonline.motorolasolutions.com/Member/OrderStatus/order_status_detail.asp'
@@ -57,6 +60,7 @@ def later_page_thread(session, SC, header, page, list, index, FO=""):
                               'SortField': 'a.LIG_NB', 'SortDirection': 'ASC', 'Toggle': 'yes', 'FO': FO,
                               'searchquote': ''}
     order_status_request = session.post(MOL_url_POST_Order_Status, params=load_detail_params)
+    timer = time.time()
     order_status_html = order_status_request.text
     order_status_html = order_status_html.replace("<FONT>", "")
     order_status_html = order_status_html.replace("</FONT>", "")
@@ -73,8 +77,11 @@ def later_page_thread(session, SC, header, page, list, index, FO=""):
                 # print(len(html_element_list[each_column].find_all('a')) == 1)
         table_rows.append(row_data)
     list[index] = table_rows
+    print(time.time() - timer)
+
 
 def get_order_details(list_IDs, session, threads):
+    timer = time.time()
     initial_tasks = []
     result_list = [''] * len(list_IDs)
     index = 0
@@ -84,7 +91,7 @@ def get_order_details(list_IDs, session, threads):
         index += 1
     full_run(initial_tasks, threads)
     IDs_to_tab_lists = {}
-
+    print('Got first pages in ' + str(time.time() - timer))
     later_pages_tasks = []
     for each_index in range(len(list_IDs)):
         SC = list_IDs[each_index]
