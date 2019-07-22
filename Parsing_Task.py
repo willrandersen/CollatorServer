@@ -10,9 +10,10 @@ import psutil
 import time
 import gc
 from Task_Queue import Task, full_run
+from multithreaded_status import *
 
 SHIPPING_THREAD_MAX = 24
-
+STATUS_REQUEST_THREADS = 24
 
 def merge_MOL_DS(DS_table, MOL_table, MOL_header):
     MOL_header.append('Internal Comments (DS Items)')
@@ -270,17 +271,18 @@ def do_table_parsing(self, request_dict, session, sort_method):
                 #     MOL_header, MOL_table = MOL_Order_Status(session, each_proj_SC)
                 #     add_shipping_data(MOL_table, MOL_header, each_proj_SC, session)
                 #     rows_to_print.extend(MOL_table)
-                threads = []
-                index = 0
-                table_outputs = [''] * len(project_SCs)
-                for each_proj_SC in project_SCs:
-                    process = Thread(target=multithreaded_project_order_status, args=[session, each_proj_SC, table_outputs, index])
-                    process.start()
-                    threads.append(process)
-                    index += 1
-                for each_thread in threads:
-                    each_thread.join()
-                print(time.time() - start_time)
+                # threads = []
+                # index = 0
+                # table_outputs = [''] * len(project_SCs)
+                # for each_proj_SC in project_SCs:
+                #     process = Thread(target=multithreaded_project_order_status, args=[session, each_proj_SC, table_outputs, index])
+                #     process.start()
+                #     threads.append(process)
+                #     index += 1
+                # for each_thread in threads:
+                #     each_thread.join()
+                # print(time.time() - start_time)
+                table_outputs = get_order_details(project_SCs, session, STATUS_REQUEST_THREADS)
                 for head, table, SC in table_outputs:
                     MOL_header = head
                     MOL_table = table
