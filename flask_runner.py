@@ -256,7 +256,7 @@ def update_unresolved_searches(username):
 
 @app.route('/favicon.ico')
 def send_logo():
-    return flask.send_from_directory('icon','favicon.ico',mimetype='image/vnd.microsoft.icon')
+    return flask.send_from_directory('icon','moto_favicon.ico',mimetype='image/vnd.microsoft.icon')
 
 @app.route('/about', methods=['GET'])
 def send_about():
