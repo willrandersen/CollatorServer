@@ -18,6 +18,7 @@ def first_page_thread(session, SC, list, index, FO=""):
                           'SortField': 'a.LIG_NB', 'SortDirection': 'ASC', 'Toggle': 'yes', 'FO': FO,
                           'searchquote': ''}
     order_status_request = session.post(MOL_url_POST_Order_Status, params=load_detail_params)
+    timer = time.time()
     order_status_html = order_status_request.text
     order_status_html = order_status_html.replace("<FONT>", "")
     order_status_html = order_status_html.replace("</FONT>", "")
@@ -50,6 +51,8 @@ def first_page_thread(session, SC, list, index, FO=""):
                 row_data['Has Serial Codes'] = len(html_element_list[each_column].find_all('a')) == 1
         table_rows.append(row_data)
     list[index] = (table_headers, table_rows, customer_name, ship_to_address, order_entry_date, pages_in_report)
+    print(time.time() - timer)
+
 
 
 def later_page_thread(session, SC, header, page, list, index, FO=""):
@@ -103,7 +106,7 @@ def get_order_details(list_IDs, session, threads):
         IDs_to_tab_lists[SC] = [''] * pages
         IDs_to_tab_lists[SC][0] = results[1]
         for index in range(2, pages + 1):
-            requested_task = Task(target=later_page_thread, args=[session, SC, header, index, IDs_to_tab_lists[SC], pages - 1])
+            requested_task = Task(target=later_page_thread, args=[session, SC, header, index, IDs_to_tab_lists[SC], index - 1])
             later_pages_tasks.append(requested_task)
     full_run(later_pages_tasks, threads)
     output_list = []
