@@ -12,8 +12,8 @@ import gc
 from Task_Queue import Task, full_run
 from multithreaded_status import *
 
-SHIPPING_THREAD_MAX = 6
-STATUS_REQUEST_THREADS = 1
+SHIPPING_THREAD_MAX = 20
+STATUS_REQUEST_THREADS = 6
 
 def merge_MOL_DS(DS_table, MOL_table, MOL_header):
     MOL_header.append('Internal Comments (DS Items)')
