@@ -179,7 +179,6 @@ def isProjectOrder(input):
 cel = Celery()
 cel.config_from_object('celery_settings')
 
-   
 
 # @cel.task()
 # def do_table_parsing(request_dict, session):

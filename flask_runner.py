@@ -1,5 +1,6 @@
 from enum import Enum
 import requests
+from requests import adapters
 from random import randint
 import lxml.html
 from bs4 import BeautifulSoup
@@ -515,6 +516,7 @@ def send_loaded_file(task_id):
 @app.route('/Login-Data', methods=['POST'])
 def handle_login():
     session = requests.Session()
+    session.mount('https://', adapters.HTTPAdapter(pool_connections=24, pool_maxsize=24))
     username = request.form['Username']
     password = request.form['Password']
 
