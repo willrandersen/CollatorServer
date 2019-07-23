@@ -19,7 +19,7 @@ def first_page_thread(session, SC, list, index, FO=""):
                           'SortField': 'a.LIG_NB', 'SortDirection': 'ASC', 'Toggle': 'yes', 'FO': FO,
                           'searchquote': ''}
     order_status_request = session.post(MOL_url_POST_Order_Status, params=load_detail_params)
-    time_request = time.time() - timer
+    time_request = time.time()
     order_status_html = order_status_request.text
     order_status_html = order_status_html.replace("<FONT>", "")
     order_status_html = order_status_html.replace("</FONT>", "")
@@ -52,7 +52,7 @@ def first_page_thread(session, SC, list, index, FO=""):
                 row_data['Has Serial Codes'] = len(html_element_list[each_column].find_all('a')) == 1
         table_rows.append(row_data)
     list[index] = (table_headers, table_rows, customer_name, ship_to_address, order_entry_date, pages_in_report)
-    print('Request took : ' + str(time_request) + ', Parsing: ' + str(time.time() - time_request))
+    print('Request took : ' + str(time_request - timer) + ', Parsing: ' + str(time.time() - time_request))
 
 
 def later_page_thread(session, SC, header, page, list, index, FO=""):
@@ -64,7 +64,7 @@ def later_page_thread(session, SC, header, page, list, index, FO=""):
                               'SortField': 'a.LIG_NB', 'SortDirection': 'ASC', 'Toggle': 'yes', 'FO': FO,
                               'searchquote': ''}
     order_status_request = session.post(MOL_url_POST_Order_Status, params=load_detail_params)
-    time_request = time.time() - timer
+    time_request = time.time()
     order_status_html = order_status_request.text
     order_status_html = order_status_html.replace("<FONT>", "")
     order_status_html = order_status_html.replace("</FONT>", "")
@@ -81,7 +81,7 @@ def later_page_thread(session, SC, header, page, list, index, FO=""):
                 # print(len(html_element_list[each_column].find_all('a')) == 1)
         table_rows.append(row_data)
     list[index] = table_rows
-    print('Request took : ' + str(time_request) + ', Parsing: ' + str(time.time() - time_request))
+    print('Request took : ' + str(time_request - timer) + ', Parsing: ' + str(time.time() - time_request))
 
 
 def get_order_details(list_IDs, session, threads):
