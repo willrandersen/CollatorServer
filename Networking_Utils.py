@@ -2,6 +2,7 @@ import requests
 import lxml.html
 from bs4 import BeautifulSoup
 import datetime
+import time
 
 def format_string(input_string):
     current_len = len(input_string)
@@ -180,9 +181,11 @@ def MOL_Order_Status(session, SC, FO=''):
 
 
 def MOL_Shipping_Data(session, SC, Line_Item):
+    timer = time.time()
     MOL_url_Post_Shipping_Details = 'https://businessonline.motorolasolutions.com/Member/OrderStatus/Shipping_Info.asp'
     load_shipping_params = {'OrderKey' : SC, 'LIG' : Line_Item, 'System' : 'COF'}
     shipping_request = session.post(MOL_url_Post_Shipping_Details, params= load_shipping_params)
+    time_request = time.time()
     shipping_detail_parser = BeautifulSoup(shipping_request.text, 'html.parser')
 
     ID_code_table_html = shipping_detail_parser.find_all('table', id='Table5')[0]
@@ -201,6 +204,7 @@ def MOL_Shipping_Data(session, SC, Line_Item):
     number_string = ''
     for each_number in shipping_number.find_all('font'):
         number_string += each_number.get_text().strip() + ', '
+    print('Shipping Data - request took : ' + str(time_request - timer) + ', Parsing: ' + str(time.time() - time_request))
     return shipping_carrier, number_string[:-2], serial_codes
 
 
