@@ -6,6 +6,7 @@ from threading import Thread
 import requests
 from bs4 import BeautifulSoup
 import lxml.html
+from Task_Queue import *
 # from enum import Enum
 #
 #
@@ -149,13 +150,12 @@ def GetProjectSCs(project_name, possible_SCs, session, original_SC=''):
             SC_project_names[count] = '', ''
             count += 1
             continue
-        process = Thread(target=GetNameThread, args=[each_SC, session, SC_project_names, count])
-        process.start()
+        process = Task(target=GetNameThread, args=[each_SC, session, SC_project_names, count])
+        #process.start()
         threads.append(process)
         count += 1
 
-    for each_thread in threads:
-        each_thread.join()
+    full_run(threads,8)
 
     same_project_SCs = []
     count = -1
