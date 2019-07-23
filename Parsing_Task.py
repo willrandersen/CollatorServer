@@ -280,8 +280,8 @@ def do_table_parsing(self, request_dict, session, sort_method):
                 #     index += 1
                 # for each_thread in threads:
                 #     each_thread.join()
-                print(time.time() - start_time)
                 table_outputs = get_order_details(project_SCs, session, STATUS_REQUEST_THREADS)
+                print(time.time() - start_time)
                 for head, table, SC in table_outputs:
                     MOL_header = head
                     MOL_table = table
