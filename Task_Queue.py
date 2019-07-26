@@ -12,7 +12,10 @@ def thread_checker(q):
     while not q.empty():
         next_task = q.get()
         #print('starting ' + str(next_task.args))
-        next_task.target(*next_task.args)
+        try:
+            next_task.target(*next_task.args)
+        except Exception as err:
+            print(err)
         q.task_done()
     return
 
