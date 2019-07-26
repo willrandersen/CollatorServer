@@ -326,10 +326,16 @@ def do_table_parsing(self, request_dict, session, sort_method):
                 each_data_point_meta_data.append(proj_name)
                 each_data_point_meta_data.append(cust_num)
 
-                for each_proj_SC in project_SCs:
-                    MOL_header, MOL_table = MOL_Order_Status(session, each_proj_SC)
-                    add_shipping_data(MOL_table, MOL_header, each_proj_SC, session)
+                table_outputs = get_order_details(project_SCs, session, STATUS_REQUEST_THREADS)
+                for head, table, SC in table_outputs:
+                    MOL_header = head
+                    MOL_table = table
+                    add_shipping_data(MOL_table, MOL_header, SC, session)
                     rows_to_print.extend(MOL_table)
+                # for each_proj_SC in project_SCs:
+                #     MOL_header, MOL_table = MOL_Order_Status(session, each_proj_SC)
+                #     add_shipping_data(MOL_table, MOL_header, each_proj_SC, session)
+                #     rows_to_print.extend(MOL_table)
             search_meta_data[each_input] = each_data_point_meta_data
         except (DatapointNotFound, IndexError):
             if isProjectOrder(each_input) or request_dict[each_input]:
