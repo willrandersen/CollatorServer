@@ -2,7 +2,6 @@ from celery import Celery, states
 from celery.exceptions import Ignore
 from bs4 import BeautifulSoup
 import requests
-from threading import Thread
 from Networking_Utils import *
 from Additional_methods import GetProjectSCs, GetProjectName, GetConfirmationNums, GetCustomerNumber
 from Parsing_Errors import NoValidInputs,DatapointNotFound
