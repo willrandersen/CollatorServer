@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 from Task_Queue import *
 from Networking_Utils import format_string
 import time
-
+from Parsing_Errors import DatapointNotFound
 
 def first_page_thread(session, SC, list, index, FO=""):
     MOL_url_POST_Order_Status = 'https://businessonline.motorolasolutions.com/Member/OrderStatus/order_status_detail.asp'
@@ -94,6 +94,9 @@ def get_order_details(list_IDs, session, threads):
         initial_tasks.append(next_task)
         index += 1
     full_run(initial_tasks, threads)
+    for each_element in result_list:
+        if each_element == '':
+            raise DatapointNotFound('Out of bounds')
     IDs_to_tab_lists = {}
     print('Got first pages in ' + str(time.time() - timer))
     later_pages_tasks = []
