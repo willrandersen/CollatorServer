@@ -96,7 +96,7 @@ def get_order_details(list_IDs, session, threads):
     full_run(initial_tasks, threads)
     for each_element in result_list:
         if each_element == '':
-            raise DatapointNotFound('Out of bounds')
+            raise IndexError
     IDs_to_tab_lists = {}
     print('Got first pages in ' + str(time.time() - timer))
     later_pages_tasks = []
