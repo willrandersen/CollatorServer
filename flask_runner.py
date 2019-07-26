@@ -22,8 +22,6 @@ MAX_TABLE_SIZE = 15
 app = Flask(__name__)
 excel.init_excel(app)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-# app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:Locomotives12moby!@localhost:5432/user_data'
 heroku = Heroku(app)
 db = SQLAlchemy(app)
 
@@ -113,7 +111,6 @@ def initiate_login(session, username, password):
 
 def get_name_from_parser(parser):
     JSscript = parser.find_all('script', type="text/javascript")
-    # print(JSscript[3].get_text().strip().startswith("var sBaseUrl = 'https://businessonline.motorolasolutions.com';"))
     for script in JSscript:
         if (script.get_text().strip().startswith("var sBaseUrl = 'https://businessonline.motorolasolutions.com';")):
             JSlogin_name = script.get_text().strip()
@@ -204,23 +201,18 @@ def get_bolded_dict_string(dict, status):
 
 
 def build_recent_table(username):
-    #start_recent_table = time.time()
     recent_searches = Search.query.filter_by(user_name=username).order_by(Search.search_started).all()
-    #print('table build time: ' + str(time.time() - start_recent_table))
     after_database = time.time()
     if len(recent_searches) == 0:
         return '<tr>No Recent Searches</tr>'
     table_html = '<tr>'
     time_delt = datetime.timedelta(hours=5)
-    #print('table build time: ' + str(time.time() - after_database))
     for each_search in recent_searches[::-1]:
         table_html += "\n<tr>"
         table_html += "<td>" + (each_search.search_started - time_delt).strftime("%b %d %Y %H:%M:%S") + " CDT </td>"
         table_html += "<td>" + each_search.task_id + "</td>"
         table_html += "<td>" + each_search.status + "</td>"
         table_html += "<td>" + get_bolded_dict_string(each_search.items_searched, each_search.status) + "</td>"
-        #table_html += "<td>" + "" + "</td>"
-        #table_html += "<td>" + "Link" + "</td>"
         if str(each_search.status) == 'SUCCESS':
             table_html += '<td> <a href="/load_search/' + each_search.task_id + '">Link</a> </td>'
         else:
@@ -231,16 +223,9 @@ def build_recent_table(username):
 
 
 def update_unresolved_searches(username):
-    #start_recent_table = time.time()
     recent_searches = Search.query.filter_by(user_name=username).all()
-    #print('table update time: ' + str(time.time() - start_recent_table))
     for each_search in recent_searches:
         task_id = each_search.task_id
-        #time_since_search = datetime.datetime.now() - each_search.search_started
-        #duration_seconds = time_since_search.total_seconds()
-        # if duration_seconds > 60 * 60 * 24 * 7:
-        #     Search.query.filter_by(task_id=task_id).delete()
-        #     continue
         if each_search.status != 'SUCCESS' and each_search.status != 'FAILURE':
             res = AsyncResult(task_id, app=cel)
             each_search.status = str(res.state)
@@ -253,9 +238,7 @@ def update_unresolved_searches(username):
             if each_search.status == 'FAILURE':
                 each_search.search_completed = datetime.datetime.now(datetime.timezone.utc)
                 res.forget()
-    #start_recent_table = time.time()
     db.session.commit()
-    #print('table commit time: ' + str(time.time() - start_recent_table))
 
 @app.route('/favicon.ico')
 def send_logo():
@@ -289,54 +272,41 @@ def get_initial_page():
     response_file = open('HTML_pages/Login_Main.html')
     return response_file.read()
 
-# @app.route('/')
-# def get_initial_page():
-#     if isLoggedIn(request):
-#         return flask.send_from_directory(directory='HTML_pages', filename='Redirect_Main.html', cache_timeout=1)
-#     return flask.send_from_directory(directory='HTML_pages', filename='Login_Main.html', cache_timeout=1)
-
 
 @app.route('/check_database')
 def get_all_data():
     all_logins = User.query.all()
     return jsonify([e.serialize() for e in all_logins])
 
+
 @app.route('/check_searches')
 def get_all_search_data():
     all_logins = Search.query.all()
     return jsonify([e.serialize() for e in all_logins])
 
+
 @app.route('/Main')
 def get_main_page():
-    #start_time = time.time()
     if not isLoggedIn(request):
         response_file = open('HTML_pages/Redirect_Home.html')
         return response_file.read()
     response_file = open('HTML_pages/Main_Page.html')
     template = response_file.read()
-    #print(time.time() - start_time)
-    #response_file.close()
     requested_with_cookie = request.cookies.get('logged_in_cookie')
     user_searched = User.query.filter_by(cookie=requested_with_cookie).first()
-    #print(time.time() - start_time)
     update_unresolved_searches(user_searched.user_name)
-    #print(time.time() - start_time)
     template = template.format(user_searched.name, build_recent_table(user_searched.user_name))
-    #print(time.time() - start_time)
     return template
+
 
 @app.route('/Run-Search')
 def get_search_page():
-    #print('logged_in_cookie' in request.cookies.keys())
     if not isLoggedIn(request):
         response_file = open('HTML_pages/Redirect_Home.html')
         return response_file.read()
     response_file = open('HTML_pages/Run_Search.html')
     return response_file.read()
-    # if 'logged_in_cookie' not in request.cookies.keys():
-    #     return flask.send_from_directory(directory='HTML_pages', filename='Redirect_Home.html')
-    # user_cookie = request.cookies.get('logged_in_cookie')
-    # return user_cookie
+
 
 @app.route('/Search', methods=['POST'])
 def run_search():
@@ -405,7 +375,6 @@ def check_status(task_id):
 
 
     res = AsyncResult(task_id, app=cel)
-    #print(res.info)
     search_object.status = str(res.state)
     info = res.info
     if search_object.status == 'RUNNING':
@@ -449,9 +418,6 @@ def show_past_search(task_id):
 
     if search_object is None:
         return 'Invalid Request', 404
-
-    #if user_object.user_name != search_object.user_name:
-    #    return 'Forbidden'
 
     if search_object.status == 'FAILURE':
         return 'Failed Search'
@@ -504,9 +470,6 @@ def send_loaded_file(task_id):
     if search_object is None:
         return 'Invalid Request'
 
-    # if user_object.user_name != search_object.user_name:
-    #     return 'Forbidden', 403
-
     if search_object.status != 'SUCCESS':
         return 'File Unready'
 
@@ -531,11 +494,6 @@ def handle_login():
     if name is None:
         return '{"Logged_in" : false}', 401
     del password
-    # name = ''
-    # if username != 'FRC374':
-    #     return '{"Logged_in" : false}'
-    # name = 'William Andersen'
-    # print(name)
 
     response_json = {}
     response_json['Logged_in'] = True
@@ -549,18 +507,6 @@ def handle_login():
 
     json_data = json.dumps(response_json)
     return json_data
-
-# @app.after_request
-# def add_header(r):
-#     """
-#     Add headers to both force latest IE rendering engine or Chrome Frame,
-#     and also to cache the rendered page for 10 minutes.
-#     """
-#     r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-#     r.headers["Pragma"] = "no-cache"
-#     r.headers["Expires"] = "0"
-#     r.headers['Cache-Control'] = 'public, max-age=0'
-#     return r
 
 if __name__ == '__main__':
     app.run(port=80, debug=True)

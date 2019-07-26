@@ -7,41 +7,6 @@ import requests
 from bs4 import BeautifulSoup
 import lxml.html
 from Task_Queue import *
-# from enum import Enum
-#
-#
-# class Login_Error(Enum):
-#     INVALID = -1
-#     TIME_OUT = -2
-#     NETWORKING_FAILURE = -3
-#
-# def MOL_Login(session, user, password):
-#     payload = {'Username': user, 'Password': password, 'Connection': 'NA',
-#                'USER': user, 'SMAUTHREASON': '0', 'btnLogin': 'Login', 'FullURL': '',
-#                'target': 'https://motonline.mot-solutions.com/default.asp', 'SMAGENTNAME': '', 'REALMOID': '',
-#                'postpreservationdata': '', 'hdnTxtCancel': '', 'hdnTxtContinue': ''}
-#     MOL_url_GET_Login = 'https://businessonline.motorolasolutions.com/login.aspx?authn_try_count=0&contextType=external&username=string&initial_command=NONE&contextValue=%2Foam&password=sercure_string&challenge_url=https%3A%2F%2Foamprod.motorolasolutions.com%2FOAMSamlRedirect%2FOAMCustomRedircet.jsp&request_id=7662974962118535276&CREDENTIAL_CONTEXT_DATA=USER_ACTION_COMMAND%2CUSER_ACTION_COMMAND%2Cnull%2Chidden%3BUsername%2CUser+ID%2C%2Ctext%3BPassword%2CPassword%2C%2Cpassword%3B&PLUGIN_CLIENT_RESPONSE=UserNamePswdClientResponse%3DUsername+and+Password+are+mandatory&locale=en_US&resource_url=https%253A%252F%252Fbusinessonline.motorolasolutions.com%252F'
-#     MOL_url_POST_Login = 'https://oamprod.motorolasolutions.com/oam/server/auth_cred_submit'
-#     login_page_text = session.get(MOL_url_GET_Login).text
-#     login_html = lxml.html.fromstring(login_page_text)
-#     hidden_inputs = login_html.xpath(r'//form//input[@type="hidden"]')
-#     for x in hidden_inputs:
-#         dict = x.attrib
-#         if 'value' in dict.keys():
-#             payload[dict['name']] = dict['value']
-#     login_request = session.post(MOL_url_POST_Login, data=payload)
-#     return login_request.text
-#
-# def initiate_login(session, username, password):
-#     Login_attempt = MOL_Login(session, username, password)
-#     initial_login_parser = BeautifulSoup(Login_attempt, 'html.parser')
-#
-#     if len(initial_login_parser.find_all('div', id='login-form')) != 0:
-#         return Login_Error.INVALID
-#     if len(initial_login_parser.find_all('p', class_='loginFailed')) != 0:
-#         return Login_Error.TIME_OUT
-#     return Login_attempt
-
 
 def format_string(input_string):
     current_len = len(input_string)
@@ -114,7 +79,6 @@ def GetConfirmationNums(cust_num, session):
                     current_SC = element_list[6].get_text()
                     if 'ONELINER' in current_order_number:
                         continue
-                    #print(current_order_number + '--' + current_SC)
                     found_SCs.append(current_SC)
         page += 1
     return found_SCs
@@ -151,7 +115,6 @@ def GetProjectSCs(project_name, possible_SCs, session, original_SC=''):
             count += 1
             continue
         process = Task(target=GetNameThread, args=[each_SC, session, SC_project_names, count])
-        #process.start()
         threads.append(process)
         count += 1
 
@@ -164,25 +127,3 @@ def GetProjectSCs(project_name, possible_SCs, session, original_SC=''):
         if each_result.strip().upper() == project_name.strip().upper():
             same_project_SCs.append(each_SC)
     return same_project_SCs
-
-
-# with requests.Session() as session:
-#     SC = 'SC18361246'
-#     #cust_id = '1035663683'
-#     #proj_name = 'IL-16I147A'.strip().upper()
-#     username = 'FRC374'
-#     password = 'Locomotives12moby!'
-#
-#     login_result = initiate_login(session, username, password)
-#     while login_result == Login_Error.TIME_OUT:
-#         login_result = initiate_login(session, username, password)
-#     print('Logged In')
-#     cust_num = GetCustomerNumber(SC, session)
-#     other_SCs = GetConfirmationNums(cust_num, session)
-#     proj_name = GetProjectName(SC, session)
-#     print(proj_name)
-#     print(cust_num)
-#     print(GetProjectSCs(proj_name, other_SCs, session, SC))
-#     #
-#     # SCs = GetConfirmationNums(cust_id, session)
-#     # print(GetProjectSCs(proj_name, SCs, session))

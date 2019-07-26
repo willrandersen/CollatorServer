@@ -1,14 +1,9 @@
 from celery import Celery, states
 from celery.exceptions import Ignore
-from bs4 import BeautifulSoup
-import requests
 from Networking_Utils import *
 from Additional_methods import GetProjectSCs, GetProjectName, GetConfirmationNums, GetCustomerNumber
-from Parsing_Errors import NoValidInputs,DatapointNotFound
 import psutil
-import time
 import gc
-from Task_Queue import Task, full_run
 from multithreaded_status import *
 
 SHIPPING_THREAD_MAX = 26
@@ -107,7 +102,6 @@ def getDSDict_from_SC(SC):
         return {}
 
     SC_table_rows_html = tables_list[0].find_all('tr')
-    #print(SC_table_rows_html)
     DS_data = [''] * (len(SC_table_rows_html) - 1)
     threads = []
     for each_row_index in range(1, len(SC_table_rows_html)):
@@ -179,56 +173,6 @@ cel = Celery()
 cel.config_from_object('celery_settings')
 
 
-# @cel.task()
-# def do_table_parsing(request_dict, session):
-#     data_dict = {}
-#     for each_input in request_dict.keys():
-#         inputIsFo = isFO(each_input)
-#         SC = None
-#         if inputIsFo:
-#             FO_Info = MOL_Search_FO(session, each_input)
-#             SC = FO_Info['Confirmation Number']
-#             if not request_dict[each_input]:
-#                 data_dict[each_input] = FO_Info
-#         else:
-#             SC = each_input
-#             if not request_dict[each_input]:
-#                 data_dict[each_input] = False
-#         if request_dict[each_input]:
-#             Additional_SCs = GetCustomerNumber(SC, session)
-#             for each_SC in Additional_SCs:
-#                 data_dict[each_SC] = False
-#
-#     rows_to_print = []
-#     MOL_header = None
-#     print('progress_1')
-#     for each_requested_data in data_dict.keys():
-#         if type(data_dict[each_requested_data]) == type({}):  # Is an FO
-#             Confirm_Number = data_dict[each_requested_data]['Confirmation Number']
-#             print('progress_2')
-#             MOL_header, MOL_table = MOL_Order_Status(session, Confirm_Number, each_requested_data)
-#             print('progress_3')
-#             #DS_table = getDSDict(each_requested_data)
-#             #merge_MOL_DS(DS_table, MOL_table, MOL_header)
-#             print('progress_4')
-#             add_shipping_data(MOL_table, MOL_header, Confirm_Number, session)
-#             rows_to_print.extend(MOL_table)
-#         else:
-#             MOL_header, MOL_table = MOL_Order_Status(session, each_requested_data)
-#             #DS_table = getDSDict_from_SC(each_requested_data)
-#             #merge_MOL_DS(DS_table, MOL_table, MOL_header)
-#             add_shipping_data(MOL_table, MOL_header, each_requested_data, session)
-#             rows_to_print.extend(MOL_table)
-#
-#     output_table = [[""] * len(MOL_header) for i in range(len(rows_to_print))]
-#
-#     sort_table(rows_to_print)
-#
-#     for each_row_value in range(len(rows_to_print)):
-#         for each_col_value in range(len(MOL_header)):
-#             output_table[each_row_value][each_col_value] = rows_to_print[each_row_value][MOL_header[each_col_value]]
-#     return output_table, MOL_header
-
 def multithreaded_project_order_status(session, sc, list, index):
     head, table = MOL_Order_Status(session, sc)
     list[index] = head, table, sc
@@ -246,7 +190,6 @@ def do_table_parsing(self, request_dict, session, sort_method):
     search_meta_data = {}
     count = 0
     length_of_dict = len(request_dict)
-    #print(psutil.virtual_memory())
     for each_input in request_dict.keys():
         each_data_point_meta_data = []
         self.update_state(state='RUNNING', meta={'done': count, 'total': length_of_dict})
@@ -264,21 +207,6 @@ def do_table_parsing(self, request_dict, session, sort_method):
 
                 each_data_point_meta_data.extend(project_SCs)
                 search_meta_data[each_input] = each_data_point_meta_data
-                #print(time.time() - start_time)
-                # for each_proj_SC in project_SCs:
-                #     MOL_header, MOL_table = MOL_Order_Status(session, each_proj_SC)
-                #     add_shipping_data(MOL_table, MOL_header, each_proj_SC, session)
-                #     rows_to_print.extend(MOL_table)
-                # threads = []
-                # index = 0
-                # table_outputs = [''] * len(project_SCs)
-                # for each_proj_SC in project_SCs:
-                #     process = Thread(target=multithreaded_project_order_status, args=[session, each_proj_SC, table_outputs, index])
-                #     process.start()
-                #     threads.append(process)
-                #     index += 1
-                # for each_thread in threads:
-                #     each_thread.join()
                 table_outputs = get_order_details(project_SCs, session, STATUS_REQUEST_THREADS)
                 print(time.time() - start_time)
                 for head, table, SC in table_outputs:
@@ -339,10 +267,6 @@ def do_table_parsing(self, request_dict, session, sort_method):
                     MOL_table = table
                     add_shipping_data(MOL_table, MOL_header, SC, session)
                     rows_to_print.extend(MOL_table)
-                # for each_proj_SC in project_SCs:
-                #     MOL_header, MOL_table = MOL_Order_Status(session, each_proj_SC)
-                #     add_shipping_data(MOL_table, MOL_header, each_proj_SC, session)
-                #     rows_to_print.extend(MOL_table)
             search_meta_data[each_input] = each_data_point_meta_data
         except (DatapointNotFound, IndexError):
             if isProjectOrder(each_input) or request_dict[each_input]:
