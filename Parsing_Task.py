@@ -310,6 +310,11 @@ def do_table_parsing(self, request_dict, session, sort_method):
                 SC = each_input
                 table_outputs = get_order_details([SC], session, STATUS_REQUEST_THREADS)
                 MOL_header, MOL_table, SC = table_outputs[0]
+                for each_row in MOL_table:
+                    if each_row['Order Number'].startswith('4808'):
+                        request_dict[each_input] = False
+                        each_data_point_meta_data[0] = "sc_risk_proj_search"
+                        break
             add_shipping_data(MOL_table, MOL_header, SC, session)
             rows_to_print.extend(MOL_table)
             if request_dict[each_input]:
