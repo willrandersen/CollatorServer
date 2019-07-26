@@ -309,7 +309,8 @@ def do_table_parsing(self, request_dict, session, sort_method):
             else:
                 each_data_point_meta_data.append("single_listid_search")
                 SC = each_input
-                MOL_header, MOL_table = MOL_Order_Status(session, SC)
+                table_outputs = get_order_details([SC], session, STATUS_REQUEST_THREADS)
+                MOL_header, MOL_table, SC = table_outputs[0]
             add_shipping_data(MOL_table, MOL_header, SC, session)
             rows_to_print.extend(MOL_table)
             if request_dict[each_input]:
