@@ -29,7 +29,7 @@ monotonic==1.5
 numpy==1.16.4
 openpyxl==2.5.14
 pandas==0.24.2
-psutil==5.6.3
+psutil==5.6.6
 psycopg2==2.8.3
 pycparser==2.19
 pyexcel==0.5.14
